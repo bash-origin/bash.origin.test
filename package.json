@@ -1,0 +1,11 @@
+{
+    "name": "bash.origin.test",
+    "version": "0.1.0",
+    "repository": "https://github.com/bash-origin/bash.origin.test.git",
+    "bin": {
+        "bash.origin.test": "tests/run.sh"
+    },
+    "scripts": {
+        "test": "tests/run.sh"
+    }
+}
