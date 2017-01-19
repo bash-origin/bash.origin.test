@@ -80,28 +80,36 @@ function init {
 										chmod u+x "$binName"
 							  fi
 						fi
-		        "$binName" | tee "$rawResultPath"
 
-						if [ -s "$rawResultPath" ]; then
+						function invokeTest {
+
+				        "$binName" | tee "$rawResultPath"
+
+								cp -f "$rawResultPath" "$actualResultPath"
+
+								# Remove sections to be ignored
+								sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
+
+								# Make paths in result relative
+								basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
+								sed -i -e "s/$basePath//g" "$actualResultPath"
+								homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
+								sed -i -e "s/$homePath//g" "$actualResultPath"
+
+								if [ -e "$actualResultPath-e" ]; then
+										rm "$actualResultPath-e"
+								fi
+
+						}
+
+						invokeTest
+
+						if [ -s "$actualResultPath" ]; then
 								echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
 								VERBOSE=1
 								BO_VERBOSE=1
-		        		"$binName" | tee "$rawResultPath"
-						fi
 
-						cp -f "$rawResultPath" "$actualResultPath"
-
-						# Remove sections to be ignored
-						sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
-
-						# Make paths in result relative
-						basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
-						sed -i -e "s/$basePath//g" "$actualResultPath"
-						homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
-						sed -i -e "s/$homePath//g" "$actualResultPath"
-
-						if [ -e "$actualResultPath-e" ]; then
-								rm "$actualResultPath-e"
+								invokeTest
 						fi
 
 
@@ -118,6 +126,9 @@ function init {
 		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
 		                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
 		                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
+		                echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
+		                echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
+										cat "$rawResultPath"
 		                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
 										cat "$actualResultPath"
 		                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
@@ -127,7 +138,7 @@ function init {
 										diff -c "$expectedResultPath" "$actualResultPath"
 										set -e
 		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-										if ! is_working_tree_clean; then
+										if ! is_pwd_working_tree_clean; then
 		                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
 										fi
 										# TODO: Optionally do not exit.
