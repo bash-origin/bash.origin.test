@@ -80,11 +80,14 @@ function init {
 										chmod u+x "$binName"
 							  fi
 						fi
-
-echo "which bash.origin: $(which bash.origin) :"
-
-
 		        "$binName" | tee "$rawResultPath"
+
+						if [ -s "$rawResultPath" ]; then
+								echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
+								VERBOSE=1
+								BO_VERBOSE=1
+		        		"$binName" | tee "$rawResultPath"
+						fi
 
 						cp -f "$rawResultPath" "$actualResultPath"
 
