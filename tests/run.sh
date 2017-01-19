@@ -83,7 +83,7 @@ function init {
 
 						function invokeTest {
 
-				        "$binName" | tee "$rawResultPath"
+				        exec "$binName" | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
@@ -121,7 +121,7 @@ function init {
                 echo "| ########## EXECUTING >>>"
 						    set -o xtrace
 						    set -x
-								"$binName"
+								exec "$binName"
 						    set +x
 						    set +o xtrace
                 echo "<<< EXECUTING ########## |"
