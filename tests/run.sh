@@ -133,6 +133,8 @@ function init {
 
 		            # Keep actual result as expected result
 		            cp -f "$actualResultPath" "$expectedResultPath"
+
+		  		      echo "$(BO_cecho "Test result recorded. Commit changes to git." ORANGE BOLD)"
 		        fi
 				popd > /dev/null
 
