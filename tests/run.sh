@@ -106,10 +106,6 @@ function init {
 						if [ ! -s "$actualResultPath" ]; then
 								echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
 
-								VERBOSE=1
-								BO_VERBOSE=1
-						    set -o xtrace
-
 								echo "'which env': $(which env)"
 								echo "'which bash.origin': $(which bash.origin)"
 								echo "PWD: $(pwd)"
@@ -118,7 +114,14 @@ function init {
 								cat "$binName"
                 echo "##########"
 
+								VERBOSE=1
+								BO_VERBOSE=1
+
+                echo "| ########## EXECUTING >>>"
+						    set -o xtrace
 								"$binName"
+						    set +o xtrace
+                echo "<<< EXECUTING ########## |"
 
                 echo "[bash.origin.test] Not running more tests so you can fix issue above!"
 								exit 1
