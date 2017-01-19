@@ -110,13 +110,18 @@ function init {
 								BO_VERBOSE=1
 						    set -o xtrace
 
+								echo "'which env': $(which env)"
+								echo "'which bash.origin': $(which bash.origin)"
 								echo "PWD: $(pwd)"
 								ls -al
                 echo "########## Test File : $binName >>>"
 								cat "$binName"
                 echo "##########"
 
-								invokeTest
+								"$binName"
+
+                echo "[bash.origin.test] Not running more tests so you can fix issue above!"
+								exit 1
 						fi
 
 
