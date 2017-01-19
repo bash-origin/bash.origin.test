@@ -126,15 +126,15 @@ function init {
 										# TODO: Optionally do not exit.
 		                exit 1
 		            fi
-		  		      echo "$(BO_cecho "OK" GREEN BOLD)"
+		  		      echo "$(BO_cecho "[bash.origin.test] Successful Test" GREEN BOLD)"
 		        else
 
-								echo "Recording test session in '.expected.log' files."
+								echo "[bash.origin.test] Recording test session in '.expected.log' files."
 
 		            # Keep actual result as expected result
 		            cp -f "$actualResultPath" "$expectedResultPath"
 
-		  		      echo "$(BO_cecho "Test result recorded. Commit changes to git." YELLOW BOLD)"
+		  		      echo "$(BO_cecho "[bash.origin.test] Test result recorded. Commit changes to git!" YELLOW BOLD)"
 		        fi
 				popd > /dev/null
 
