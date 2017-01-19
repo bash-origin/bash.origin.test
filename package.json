@@ -6,6 +6,6 @@
         "bash.origin.test": "tests/run.sh"
     },
     "scripts": {
-        "test": "tests/run.sh"
+        "test": "tests/run.sh tests"
     }
 }

@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
-		if [ -f "./bash.origin" ]; then
-				# Invoked from root directory (usually via 'npm test')
-				. "./bash.origin"
-		elif [ -f "../bash.origin" ]; then
-				# Invoked from this directory.
-				. "../bash.origin"
-		fi
+		. bash.origin BOE
 fi
 function init {
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
@@ -33,7 +27,8 @@ function init {
 
 
 		# @source http://stackoverflow.com/a/3879077/330439
-		function is_working_tree_clean {
+		function is_pwd_working_tree_clean {
+				# TODO: Only stop if sub-path is dirty (use bash.origin.git to get git root and use helper)
 		    # Update the index
 		    git update-index -q --ignore-submodules --refresh
 		    # Disallow unstaged changes in the working tree
@@ -62,9 +57,30 @@ function init {
 		        local expectedResultPath=".expected.log"
 
 
+						# TODO: Add actual files to ignore rules at git root using bash.origin.git (only if --record)
+
+
 		        BO_resetLoaded
 		        # Run test and record actual result
-		        ./main | tee "$rawResultPath"
+						binName="./main.sh"
+						if [ ! -e "$binName" ]; then
+								binName="./main"
+						fi
+						if [ ! -e "$binName" ]; then
+									echo >&2 "$(BO_cecho "ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
+									exit 1
+						fi
+
+						if [[ ! -x "$binName" ]]; then
+		        		if [ $RECORD == 0 ]; then
+										echo >&2 "$(BO_cecho "ERROR: Test entry point '$binName' not executable! (pwd: $(pwd))" RED BOLD)"
+										exit 1
+								else
+										echo "Making test entry point '$binName' executable. (pwd: $(pwd))"
+										chmod u+x "$binName"
+							  fi
+						fi
+		        "$binName" | tee "$rawResultPath"
 
 						cp -f "$rawResultPath" "$actualResultPath"
 
@@ -86,7 +102,7 @@ function init {
 
 		            # Compare actual result with expected result
 		            if [ ! -e "$expectedResultPath" ]; then
-		                echo "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result."
+		                echo >&2 "$(BO_cecho "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
 		                exit 1
 		            fi
 								if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
@@ -124,30 +140,38 @@ function init {
     }
 
 
-		pushd "$__BO_DIR__" > /dev/null
+		baseDir="$1"
+		testName="$2"
+
+		if [ ! -d "$baseDir" ]; then
+				echo >&2 "$(BO_cecho "ERROR: Directory '$baseDir' not found! (pwd: $(pwd))" RED BOLD)"
+				exit 1
+		fi
+
+		pushd "$baseDir" > /dev/null
 
 				if [ $RECORD == 1 ]; then
-						if ! is_working_tree_clean; then
+						if ! is_pwd_working_tree_clean; then
 								echo >&2 "$(BO_cecho "ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
 								exit 1
 						fi
 		        git clean -d -x -f > /dev/null
 				else
-						if is_working_tree_clean; then
+						if is_pwd_working_tree_clean; then
 		        		git clean -d -x -f > /dev/null
 						fi
 				fi
 
-				if [ -z "$1" ]; then
-		        for mainpath in */main ; do
-		            runTest "$(echo "$mainpath" | sed 's/\/main$//')"
-		        done
+				if [ -z "$testName" ]; then
+						for mainpath in */main*; do
+	            	runTest "$(dirname "$mainpath")"
+						done
 				else
-						if [ ! -d "$1-"* ]; then
-								echo >&2 "$(BO_cecho "ERROR: Cannot find test with prefix '$1-'" RED BOLD)"
+						if [ ! -d "$testName-"* ]; then
+								echo >&2 "$(BO_cecho "ERROR: Cannot find test with prefix '$testName-'" RED BOLD)"
 								exit 1
 						fi
-						pushd "$1-"* > /dev/null
+						pushd "$testName-"* > /dev/null
 
 		            runTest "$(echo "$mainpath" | sed 's/\/main$//')"
 
