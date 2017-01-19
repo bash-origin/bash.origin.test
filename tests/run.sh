@@ -80,6 +80,10 @@ function init {
 										chmod u+x "$binName"
 							  fi
 						fi
+
+echo "which bash.origin: $(which bash.origin) :"
+
+
 		        "$binName" | tee "$rawResultPath"
 
 						cp -f "$rawResultPath" "$actualResultPath"
