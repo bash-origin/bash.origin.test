@@ -120,7 +120,9 @@ function init {
 
                 echo "| ########## EXECUTING >>>"
 						    set -o xtrace
+						    set -x
 								"$binName"
+						    set +x
 						    set +o xtrace
                 echo "<<< EXECUTING ########## |"
 
