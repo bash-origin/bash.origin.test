@@ -106,8 +106,10 @@ function init {
 
 						if [ ! -s "$actualResultPath" ]; then
 								echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
+
 								VERBOSE=1
 								BO_VERBOSE=1
+						    set -o xtrace
 
 								invokeTest
 						fi
