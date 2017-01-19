@@ -108,6 +108,7 @@ function init {
 
 								echo "'which env': $(which env)"
 								echo "'which bash.origin': $(which bash.origin)"
+								echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
 								echo "PWD: $(pwd)"
 								ls -al
                 echo "########## Test File : $binName >>>"
