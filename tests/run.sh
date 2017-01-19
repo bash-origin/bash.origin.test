@@ -99,7 +99,6 @@ function init {
 								if [ -e "$actualResultPath-e" ]; then
 										rm "$actualResultPath-e"
 								fi
-
 						}
 
 						invokeTest
@@ -110,6 +109,12 @@ function init {
 								VERBOSE=1
 								BO_VERBOSE=1
 						    set -o xtrace
+
+								echo "PWD: $(pwd)"
+								ls -al
+                echo "########## Test File : $binName >>>"
+								cat "$binName"
+                echo "##########"
 
 								invokeTest
 						fi
