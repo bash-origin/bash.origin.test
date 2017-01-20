@@ -6,7 +6,7 @@
     "bash.origin.test": "tests/run.sh"
   },
   "scripts": {
-    "test": "bash tests/run.sh tests"
+    "test": "bash node_modules/.bin/bash.origin BOB tests/run.sh tests"
   },
   "dependencies": {
     "bash.origin": "^0.1.36"
