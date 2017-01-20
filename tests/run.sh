@@ -119,11 +119,9 @@ function init {
 								BO_VERBOSE=1
 
                 echo "| ########## EXECUTING >>>"
-						    set -o xtrace
 						    set -x
 								"$binName"
 						    set +x
-						    set +o xtrace
                 echo "<<< EXECUTING ########## |"
 
                 echo "[bash.origin.test] Not running more tests so you can fix issue above!"
