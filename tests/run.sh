@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		. bash.origin BOE
@@ -62,28 +62,30 @@ function init {
 
 		        BO_resetLoaded
 		        # Run test and record actual result
-						binName="./main.sh"
-						if [ ! -e "$binName" ]; then
-								binName="./main"
+						testRootFile="./main.sh"
+						if [ ! -e "$testRootFile" ]; then
+								testRootFile="./main"
 						fi
-						if [ ! -e "$binName" ]; then
+						if [ ! -e "$testRootFile" ]; then
 									echo >&2 "$(BO_cecho "ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
 									exit 1
 						fi
 
-						if [[ ! -x "$binName" ]]; then
+						if [[ ! -x "$testRootFile" ]]; then
 		        		if [ $RECORD == 0 ]; then
-										echo >&2 "$(BO_cecho "ERROR: Test entry point '$binName' not executable! (pwd: $(pwd))" RED BOLD)"
+										echo >&2 "$(BO_cecho "ERROR: Test entry point '$testRootFile' not executable! (pwd: $(pwd))" RED BOLD)"
 										exit 1
 								else
-										echo "Making test entry point '$binName' executable. (pwd: $(pwd))"
-										chmod u+x "$binName"
+										echo "Making test entry point '$testRootFile' executable. (pwd: $(pwd))"
+										chmod u+x "$testRootFile"
 							  fi
 						fi
 
 						function invokeTest {
 
-				        "$binName" | tee "$rawResultPath"
+								# TODO: Write wrapper for 'testRootFile' that will log error message
+								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
+				        bash "$testRootFile" | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
@@ -111,8 +113,8 @@ function init {
 								echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
 								echo "PWD: $(pwd)"
 								ls -al
-                echo "########## Test File : $binName >>>"
-								cat "$binName"
+                echo "########## Test File : $testRootFile >>>"
+								cat "$testRootFile"
                 echo "##########"
 
 								VERBOSE=1
@@ -120,7 +122,7 @@ function init {
 
                 echo "| ########## EXECUTING >>>"
 						    set -x
-								"$binName"
+								bash "$testRootFile"
 						    set +x
                 echo "<<< EXECUTING ########## |"
 
