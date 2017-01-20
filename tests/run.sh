@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		. bash.origin BOE
