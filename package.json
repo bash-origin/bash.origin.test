@@ -1,14 +1,14 @@
 {
-  "name": "bash.origin.test",
-  "version": "0.1.0",
-  "repository": "https://github.com/bash-origin/bash.origin.test.git",
-  "bin": {
-    "bash.origin.test": "tests/run.sh"
-  },
-  "scripts": {
-    "test": "tests/run.sh tests"
-  },
-  "dependencies": {
-    "bash.origin": "^0.1.36"
-  }
+    "name": "bash.origin.test",
+    "version": "0.1.1",
+    "repository": "https://github.com/bash-origin/bash.origin.test.git",
+    "bin": {
+        "bash.origin.test": "tests/run.sh"
+    },
+    "scripts": {
+        "test": "tests/run.sh tests"
+    },
+    "dependencies": {
+        "bash.origin": "^0.1.36"
+    }
 }
