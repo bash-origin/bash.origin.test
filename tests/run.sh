@@ -61,20 +61,6 @@ function init {
 		# TODO: Ensure 'bash.origin' bin using own helper.
 		BO_ensure_nvm
 
-		export BO_PACKAGES_DIR="$__BO_DIR__/.deps"
-		export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
-
-    local RECORD=0
-
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
-
-		if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
-        RECORD=1
-		elif echo "$npm_config_argv" | grep -q -Ee '"--record"'; then
-		    RECORD=1
-		fi
 
 
 		# @source http://stackoverflow.com/a/3879077/330439
@@ -147,9 +133,8 @@ function init {
 
 								# Remove sections to be ignored
 								sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
-
 								# Make paths in result relative
-								basePath=`echo "$(dirname $__BO_DIR__)" | sed 's/\\//\\\\\\//g'`
+								basePath=`echo "$testBaseDir" | sed 's/\\//\\\\\\//g'`
 								sed -i -e "s/$basePath//g" "$actualResultPath"
 								homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
 								sed -i -e "s/$homePath//g" "$actualResultPath"
@@ -233,15 +218,32 @@ function init {
     }
 
 
-		baseDir="$1"
+		testBaseDir="$(pwd)/$1"
 		testName="$2"
 
-		if [ ! -d "$baseDir" ]; then
-				echo >&2 "$(BO_cecho "ERROR: Directory '$baseDir' not found! (pwd: $(pwd))" RED BOLD)"
+		if [ ! -d "$testBaseDir" ]; then
+				echo >&2 "$(BO_cecho "ERROR: Directory '$testBaseDir' not found! (pwd: $(pwd))" RED BOLD)"
 				exit 1
 		fi
 
-		pushd "$baseDir" > /dev/null
+		pushd "$testBaseDir" > /dev/null
+
+
+				export BO_PACKAGES_DIR="$(pwd)/.deps"
+				export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
+
+		    local RECORD=0
+
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+
+				if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
+		        RECORD=1
+				elif echo "$npm_config_argv" | grep -q -Ee '"--record"'; then
+				    RECORD=1
+				fi
+
 
 				if [ $RECORD == 1 ]; then
 						if ! is_pwd_working_tree_clean; then
