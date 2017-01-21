@@ -9,6 +9,6 @@
         "test": "tests/run.sh tests"
     },
     "dependencies": {
-        "bash.origin": "^0.1.41"
+        "bash.origin": "^0.1.43"
     }
 }

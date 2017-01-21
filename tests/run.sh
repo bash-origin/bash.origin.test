@@ -60,7 +60,7 @@ fi
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		if type bash.origin > /dev/null 2>&1; then
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . bash.origin BOE"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . bash.origin BOE (which bash.origin: $(which bash.origin))"
 				. bash.origin BOE
 		elif [ -e "$HOME/.bash.origin" ]; then
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . $HOME/.bash.origin"
