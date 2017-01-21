@@ -239,9 +239,12 @@ function init {
 
 		pushd "$testBaseDir" > /dev/null
 
-
-				export BO_PACKAGES_DIR="$(pwd)/.deps"
-				export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
+				if [ -z "$BO_PACKAGES_DIR" ]; then
+						export BO_PACKAGES_DIR="$(pwd)/.deps"
+				fi
+				if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
+						export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
+				fi
 
 		    local RECORD=0
 
