@@ -73,7 +73,7 @@ function init {
 
 						if [[ ! -x "$testRootFile" ]]; then
 		        		if [ $RECORD == 0 ]; then
-										echo >&2 "$(BO_cecho "ERROR: Test entry point '$testRootFile' not executable! (pwd: $(pwd))" RED BOLD)"
+										echo >&2 "$(BO_cecho "ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
 										exit 1
 								else
 										echo "Making test entry point '$testRootFile' executable. (pwd: $(pwd))"
@@ -85,7 +85,7 @@ function init {
 
 								# TODO: Write wrapper for 'testRootFile' that will log error message
 								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
-				        bash "$testRootFile" | tee "$rawResultPath"
+				        bash "$__BO_DIR__/runner.sh" "$testRootFile" | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
@@ -122,7 +122,7 @@ function init {
 
                 echo "| ########## EXECUTING >>>"
 						    set -x
-								bash "$testRootFile"
+								bash "$__BO_DIR__/runner.sh" "$testRootFile"
 						    set +x
                 echo "<<< EXECUTING ########## |"
 
