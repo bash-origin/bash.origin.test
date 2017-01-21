@@ -134,9 +134,14 @@ function init {
 								# Remove sections to be ignored
 								sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
 								# Make paths in result relative
+								ownPath=`echo "$(pwd)" | sed 's/\\//\\\\\\//g'`
+								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $ownPath"
+								sed -i -e "s/$ownPath//g" "$actualResultPath"
 								basePath=`echo "$testBaseDir" | sed 's/\\//\\\\\\//g'`
+								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $basePath"
 								sed -i -e "s/$basePath//g" "$actualResultPath"
 								homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
+								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $homePath"
 								sed -i -e "s/$homePath//g" "$actualResultPath"
 
 								if [ -e "$actualResultPath-e" ]; then
