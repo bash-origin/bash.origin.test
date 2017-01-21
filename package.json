@@ -9,6 +9,6 @@
         "test": "BO_VERBOSE=1 tests/run.sh tests"
     },
     "dependencies": {
-        "bash.origin": "^0.1.40"
+        "bash.origin": "^0.1.41"
     }
 }
