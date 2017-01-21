@@ -6,7 +6,7 @@
         "bash.origin.test": "tests/run.sh"
     },
     "scripts": {
-        "test": "tests/run.sh tests"
+        "test": "BO_VERBOSE=1 tests/run.sh tests"
     },
     "dependencies": {
         "bash.origin": "^0.1.40"
