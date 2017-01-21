@@ -50,6 +50,11 @@ function ensureBash4 {
 ensureBash4 "$@"
 
 
+if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then
+		BO_ROOT_SCRIPT_PATH="$__BO_DIR__/../node_modules/bash.origin/bash.origin"
+		$BO_ROOT_SCRIPT_PATH BO install
+fi
+
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_LOADED: ${BO_LOADED}"
 
 # Source https://github.com/cadorn/bash.origin
