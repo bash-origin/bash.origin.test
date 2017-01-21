@@ -1,50 +1,53 @@
 #!/usr/bin/env bash
 
-BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
-eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
-function BO_setResult {
-		local  __resultvar=$1
-    eval $__resultvar="'$2'"
-		return 0
-}
-function BO_deriveSelfDir {
-		# @source http://stackoverflow.com/a/246128/330439
-		local SOURCE="$2"
-		local DIR=""
-		while [ -h "$SOURCE" ]; do
-			  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-			  SOURCE="$(readlink "$SOURCE")"
-			  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-		done
-		BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-		return 0
-}
-BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
+function ensureBash4 {
+		BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
+		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+		function BO_setResult {
+				local  __resultvar=$1
+		    eval $__resultvar="'$2'"
+				return 0
+		}
+		function BO_deriveSelfDir {
+				# @source http://stackoverflow.com/a/246128/330439
+				local SOURCE="$2"
+				local DIR=""
+				while [ -h "$SOURCE" ]; do
+					  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+					  SOURCE="$(readlink "$SOURCE")"
+					  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+				done
+				BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+				return 0
+		}
+		BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
-export BO_BASH=$(which bash)
+		export BO_BASH=$(which bash)
 
-if [[ "$SHELL" != *"/bash" ]]; then
-    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
-				echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
-				exit 1
+		if [[ "$SHELL" != *"/bash" ]]; then
+		    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
+						echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
+						exit 1
+				fi
+				export _BO_TEST_LAUNCHED_BASH_4="1"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
+				SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
+				exit 0
 		fi
-		export _BO_TEST_LAUNCHED_BASH_4="1"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
-		SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
-		exit 0
-fi
-if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
-    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
-				echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
-				exit 1
+		if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
+		    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
+						echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
+						exit 1
+				fi
+				export _BO_TEST_LAUNCHED_BASH_4="1"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
+				SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
+				exit 0
 		fi
-		export _BO_TEST_LAUNCHED_BASH_4="1"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
-		SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
-		exit 0
-fi
+}
+ensureBash4 "$@"
 
 
 # Source https://github.com/cadorn/bash.origin
@@ -226,6 +229,9 @@ function init {
 		testBaseDir="$(pwd)/$1"
 		testName="$2"
 
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testBaseDir: $testBaseDir"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testName: $testName"
+
 		if [ ! -d "$testBaseDir" ]; then
 				echo >&2 "$(BO_cecho "ERROR: Directory '$testBaseDir' not found! (pwd: $(pwd))" RED BOLD)"
 				exit 1
@@ -263,6 +269,9 @@ function init {
 				fi
 
 				if [ -z "$testName" ]; then
+
+						[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Look for test root scripts in: $(pwd) / * / main*"
+
 						for mainpath in */main*; do
 	            	runTest "$(dirname "$mainpath")"
 						done
