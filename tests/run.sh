@@ -46,6 +46,7 @@ if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
 		exit 0
 fi
 
+
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		. bash.origin BOE
