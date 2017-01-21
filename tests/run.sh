@@ -104,9 +104,9 @@ function init {
 
 		        BO_resetLoaded
 		        # Run test and record actual result
-						testRootFile="./main.sh"
+						testRootFile="$(pwd)/main.sh"
 						if [ ! -e "$testRootFile" ]; then
-								testRootFile="./main"
+								testRootFile="$(pwd)/main"
 						fi
 						if [ ! -e "$testRootFile" ]; then
 									echo >&2 "$(BO_cecho "ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
@@ -198,7 +198,7 @@ function init {
 										cat "$expectedResultPath"
 		                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
 										set +e
-										diff -c "$expectedResultPath" "$actualResultPath"
+										diff -u "$expectedResultPath" "$actualResultPath"
 										set -e
 		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
 										if ! is_pwd_working_tree_clean; then
