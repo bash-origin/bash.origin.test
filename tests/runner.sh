@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] START args: $@"
 . bash.origin BOE
-BO_resetLoaded
 cmd="$1"
 shift
-[ -z "$BO_VERBOSE" ] || BO_log "$BO_VERBOSE" "[bash.origin.test][runner.sh] Calling: $cmd $@"
+
+# TODO: Remove once 'bash.origin' is on bin path automatically
+BO_ensure_nvm
+
+binName="$(which bash.origin)"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Calling: $binName $cmd $@"
 set +e
-export SHELL_RESOLVED=$(which bash)
-"$SHELL_RESOLVED" "$cmd" "$@"
+BO_LOADED= BO_IS_SOURCING= BO_sourceProfile__sourced= "$binName" "$cmd" "$@"
 rc=$?
 if [[ $rc != 0 ]]; then
     echo "[exit code: $rc]"

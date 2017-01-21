@@ -21,28 +21,28 @@ function BO_deriveSelfDir {
 }
 BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
 
-export SHELL_RESOLVED=$(which bash)
+export BO_BASH=$(which bash)
 
 if [[ "$SHELL" != *"/bash" ]]; then
     if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
-				echo >&2 "ERROR: bash version 4 required! (SHELL_RESOLVED: $SHELL_RESOLVED)"
+				echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
 				exit 1
 		fi
 		export _BO_TEST_LAUNCHED_BASH_4="1"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] SHELL_RESOLVED: $SHELL_RESOLVED"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$SHELL_RESOLVED'"
-		SHELL="$SHELL_RESOLVED" "$SHELL_RESOLVED" "$__BO_DIR__/run.sh" "$@"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
+		SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
 		exit 0
 fi
 if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
     if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
-				echo >&2 "ERROR: bash version 4 required! (SHELL_RESOLVED: $SHELL_RESOLVED)"
+				echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
 				exit 1
 		fi
 		export _BO_TEST_LAUNCHED_BASH_4="1"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] SHELL_RESOLVED: $SHELL_RESOLVED"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$SHELL_RESOLVED'"
-		SHELL="$SHELL_RESOLVED" "$SHELL_RESOLVED" "$__BO_DIR__/run.sh" "$@"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
+		SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
 		exit 0
 fi
 
@@ -68,7 +68,7 @@ function init {
 
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] SHELL_RESOLVED: $SHELL_RESOLVED"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
 
 		if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
         RECORD=1
@@ -79,6 +79,11 @@ function init {
 
 		# @source http://stackoverflow.com/a/3879077/330439
 		function is_pwd_working_tree_clean {
+				if echo "$@" | grep -q -Ee '(\$|\s*)--ignore-dirt(\s*|\$)'; then
+						return 0
+				elif echo "$npm_config_argv" | grep -q -Ee '"--ignore-dirt"'; then
+						return 0
+				fi
 				# TODO: Only stop if sub-path is dirty (use bash.origin.git to get git root and use helper)
 		    # Update the index
 		    git update-index -q --ignore-submodules --refresh
@@ -136,7 +141,7 @@ function init {
 
 								# TODO: Write wrapper for 'testRootFile' that will log error message
 								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
-				        "$SHELL_RESOLVED" "$__BO_DIR__/runner.sh" "$testRootFile" | tee "$rawResultPath"
+				        "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile" | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
@@ -172,7 +177,7 @@ function init {
 
                 echo "| ########## EXECUTING >>>"
 						    set -x
-								BO_VERBOSE=1 VERBOSE=1 "$SHELL_RESOLVED" "$__BO_DIR__/runner.sh" "$testRootFile"
+								BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
 						    set +x
                 echo "<<< EXECUTING ########## |"
 
