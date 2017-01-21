@@ -52,6 +52,8 @@ ensureBash4 "$@"
 
 if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then
 		BO_ROOT_SCRIPT_PATH="$__BO_DIR__/../node_modules/bash.origin/bash.origin"
+fi
+if [ ! -e "$BO_ROOT_SCRIPT_PATH" ]; then
 		$BO_ROOT_SCRIPT_PATH BO install
 fi
 
