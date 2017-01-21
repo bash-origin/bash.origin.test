@@ -65,6 +65,9 @@ function init {
 
     local RECORD=0
 
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] SHELL_RESOLVED: $SHELL_RESOLVED"
 
 		if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
         RECORD=1
@@ -132,7 +135,7 @@ function init {
 
 								# TODO: Write wrapper for 'testRootFile' that will log error message
 								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
-				        bash "$__BO_DIR__/runner.sh" "$testRootFile" | tee "$rawResultPath"
+				        "$SHELL_RESOLVED" "$__BO_DIR__/runner.sh" "$testRootFile" | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
@@ -157,6 +160,8 @@ function init {
 
 								echo "'which env': $(which env)"
 								echo "'which bash.origin': $(which bash.origin)"
+								echo "'which bash': $(which bash)"
+								echo "'bash --version': $(bash --version)"
 								echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
 								echo "PWD: $(pwd)"
 								ls -al
@@ -164,12 +169,9 @@ function init {
 								cat "$testRootFile"
                 echo "##########"
 
-								VERBOSE=1
-								BO_VERBOSE=1
-
                 echo "| ########## EXECUTING >>>"
 						    set -x
-								bash "$__BO_DIR__/runner.sh" "$testRootFile"
+								BO_VERBOSE=1 VERBOSE=1 "$SHELL_RESOLVED" "$__BO_DIR__/runner.sh" "$testRootFile"
 						    set +x
                 echo "<<< EXECUTING ########## |"
 
