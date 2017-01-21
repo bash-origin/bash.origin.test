@@ -1,4 +1,51 @@
 #!/usr/bin/env bash
+
+BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
+eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
+function BO_setResult {
+		local  __resultvar=$1
+    eval $__resultvar="'$2'"
+		return 0
+}
+function BO_deriveSelfDir {
+		# @source http://stackoverflow.com/a/246128/330439
+		local SOURCE="$2"
+		local DIR=""
+		while [ -h "$SOURCE" ]; do
+			  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+			  SOURCE="$(readlink "$SOURCE")"
+			  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+		done
+		BO_setResult $1 "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+		return 0
+}
+BO_deriveSelfDir __BO_DIR__ "$BO_SELF_BASH_SOURCE"
+
+export SHELL_RESOLVED=$(which bash)
+
+if [[ "$SHELL" != *"/bash" ]]; then
+    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
+				echo >&2 "ERROR: bash version 4 required! (SHELL_RESOLVED: $SHELL_RESOLVED)"
+				exit 1
+		fi
+		export _BO_TEST_LAUNCHED_BASH_4="1"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] SHELL_RESOLVED: $SHELL_RESOLVED"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$SHELL_RESOLVED'"
+		SHELL="$SHELL_RESOLVED" "$SHELL_RESOLVED" "$__BO_DIR__/run.sh" "$@"
+		exit 0
+fi
+if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
+    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
+				echo >&2 "ERROR: bash version 4 required! (SHELL_RESOLVED: $SHELL_RESOLVED)"
+				exit 1
+		fi
+		export _BO_TEST_LAUNCHED_BASH_4="1"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] SHELL_RESOLVED: $SHELL_RESOLVED"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$SHELL_RESOLVED'"
+		SHELL="$SHELL_RESOLVED" "$SHELL_RESOLVED" "$__BO_DIR__/run.sh" "$@"
+		exit 0
+fi
+
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		. bash.origin BOE
