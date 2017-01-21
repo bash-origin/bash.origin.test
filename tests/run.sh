@@ -50,13 +50,18 @@ function ensureBash4 {
 ensureBash4 "$@"
 
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_LOADED: ${BO_LOADED}"
+
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
 		if type bash.origin > /dev/null 2>&1; then
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . bash.origin BOE"
 				. bash.origin BOE
 		elif [ -e "$HOME/.bash.origin" ]; then
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . $HOME/.bash.origin"
 				. "$HOME/.bash.origin"
 		elif [ -e "$__BO_DIR__/../node_modules/bash.origin/bash.origin" ]; then
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . $__BO_DIR__/../node_modules/bash.origin/bash.origin"
 				. "$__BO_DIR__/../node_modules/bash.origin/bash.origin"
 		else
 				echo >&2 "ERROR: 'bash.origin' could not be found!"
@@ -67,6 +72,9 @@ function init {
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
 		BO_deriveSelfDir ___TMP___ "$BO_SELF_BASH_SOURCE"
 		local __BO_DIR__="$___TMP___"
+
+
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] init()"
 
 
 		# Ensure 'bash.origin' is on path (will be place in NVM bin dir`)
