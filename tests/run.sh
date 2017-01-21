@@ -52,7 +52,16 @@ ensureBash4 "$@"
 
 # Source https://github.com/cadorn/bash.origin
 if [ -z "${BO_LOADED}" ]; then
-		. bash.origin BOE
+		if type bash.origin > /dev/null 2>&1; then
+				. bash.origin BOE
+		elif [ -e "$HOME/.bash.origin" ]; then
+				. "$HOME/.bash.origin"
+		elif [ -e "$__BO_DIR__/../node_modules/bash.origin/bash.origin" ]; then
+				. "$__BO_DIR__/../node_modules/bash.origin/bash.origin"
+		else
+				echo >&2 "ERROR: 'bash.origin' could not be found!"
+				exit 1
+		fi
 fi
 function init {
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
