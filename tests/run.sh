@@ -130,6 +130,13 @@ function init {
 		        local expectedResultPath=".expected.log"
 
 
+						if [ ! -e "$expectedResultPath" ]; then
+								# If no expected result is found we generate it
+								RECORD=1
+		  		      echo "$(BO_cecho "[bash.origin.test] No expected test result found. Recording it ..." YELLOW BOLD)"
+						fi
+
+
 						# TODO: Add actual files to ignore rules at git root using bash.origin.git (only if --record)
 
 
@@ -226,31 +233,40 @@ function init {
 		                echo >&2 "$(BO_cecho "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
 		                exit 1
 		            fi
-								if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
-		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-		                echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
-		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-		                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
-		                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
-		                echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
-		                echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
-										cat "$rawResultPath"
-		                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
-										cat "$actualResultPath"
-		                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
-										cat "$expectedResultPath"
-		                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
-										set +e
-										diff -u "$expectedResultPath" "$actualResultPath"
-										set -e
-		                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-										if ! is_pwd_working_tree_clean; then
-		                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
-										fi
-										# TODO: Optionally do not exit.
-		                exit 1
-		            fi
-		  		      echo "$(BO_cecho "[bash.origin.test] Successful Test" GREEN BOLD)"
+
+								if grep -Fxq ">>>SKIP_TEST<<<" "$actualResultPath"; then
+
+				  		      echo "$(BO_cecho "[bash.origin.test] Skipped Test" YELLOW BOLD)"
+
+								else
+
+										if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
+				                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+				                echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
+				                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+				                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
+				                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
+				                echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
+				                echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
+												cat "$rawResultPath"
+				                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
+												cat "$actualResultPath"
+				                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
+												cat "$expectedResultPath"
+				                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
+												set +e
+												diff -u "$expectedResultPath" "$actualResultPath"
+												set -e
+				                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+												if ! is_pwd_working_tree_clean; then
+				                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
+												fi
+												# TODO: Optionally do not exit.
+				                exit 1
+				            fi
+
+				  		      echo "$(BO_cecho "[bash.origin.test] Successful Test" GREEN BOLD)"
+								fi
 		        else
 
 								echo "[bash.origin.test] Recording test session in '.expected.log' files."
