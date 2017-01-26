@@ -50,11 +50,15 @@ function ensureBash4 {
 ensureBash4 "$@"
 
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+
+
 if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then
 		BO_ROOT_SCRIPT_PATH="$__BO_DIR__/../node_modules/bash.origin/bash.origin"
 fi
-if [ ! -e "$BO_ROOT_SCRIPT_PATH" ]; then
-		$BO_ROOT_SCRIPT_PATH BO install
+if [ ! -e "$HOME/.bash.origin" ]; then
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Installing '$BO_ROOT_SCRIPT_PATH' to '$HOME/.bash.origin'!"
+		"$BO_BASH" "$BO_ROOT_SCRIPT_PATH" BO install
 fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_LOADED: ${BO_LOADED}"
