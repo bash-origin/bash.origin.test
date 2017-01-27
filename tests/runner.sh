@@ -16,9 +16,12 @@ else
 fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Calling: $binName $cmd $@"
+BO_format "${BO_VERBOSE}" "HEADER" "Running: $binName $cmd"
 set +e
 BO_LOADED= BO_IS_SOURCING= BO_sourceProfile__sourced= "$binName" "$cmd" "$@"
 rc=$?
+set -e
+BO_format "${BO_VERBOSE}" "FOOTER"
 if [[ $rc != 0 ]]; then
     echo "[exit code: $rc]"
     exit 1

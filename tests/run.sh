@@ -203,81 +203,89 @@ function init {
 
 						invokeTest
 
-						if [ ! -s "$actualResultPath" ]; then
-								echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
+						if echo "$@" | grep -q -Ee '(\$|\s*)--dev(\s*|\$)'; then
+		  		      echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in dev mode." YELLOW BOLD)"
+						elif echo "$npm_config_argv" | grep -q -Ee '"--dev"'; then
+		  		      echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in dev mode." YELLOW BOLD)"
+						else
 
-								echo "'which env': $(which env)"
-								echo "'which bash.origin': $(which bash.origin)"
-								echo "'which bash': $(which bash)"
-								echo "'bash --version': $(bash --version)"
-								echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
-								echo "PWD: $(pwd)"
-								ls -al
-                echo "########## Test File : $testRootFile >>>"
-								cat "$testRootFile"
-                echo "##########"
+								if [ ! -s "$actualResultPath" ]; then
 
-                echo "| ########## EXECUTING >>>"
-						    set -x
-								BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
-						    set +x
-                echo "<<< EXECUTING ########## |"
+										echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
 
-                echo "[bash.origin.test] Not running more tests so you can fix issue above!"
-								exit 1
-						fi
+										echo "'which env': $(which env)"
+										echo "'which bash.origin': $(which bash.origin)"
+										echo "'which bash': $(which bash)"
+										echo "'bash --version': $(bash --version)"
+										echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
+										echo "PWD: $(pwd)"
+										ls -al
+		                echo "########## Test File : $testRootFile >>>"
+										cat "$testRootFile"
+		                echo "##########"
+
+		                echo "| ########## EXECUTING >>>"
+								    set -x
+										BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
+								    set +x
+		                echo "<<< EXECUTING ########## |"
+
+		                echo "[bash.origin.test] Not running more tests so you can fix issue above!"
+										exit 1
+								fi
 
 
-		        if [ $RECORD == 0 ]; then
+				        if [ $RECORD == 0 ]; then
 
-		            # Compare actual result with expected result
-		            if [ ! -e "$expectedResultPath" ]; then
-		                echo >&2 "$(BO_cecho "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
-		                exit 1
-		            fi
-
-								if grep -Fxq ">>>SKIP_TEST<<<" "$actualResultPath"; then
-
-				  		      echo "$(BO_cecho "[bash.origin.test] Skipped Test" YELLOW BOLD)"
-
-								else
-
-										if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
-				                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-				                echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
-				                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-				                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
-				                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
-				                echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
-				                echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
-												cat "$rawResultPath"
-				                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
-												cat "$actualResultPath"
-				                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
-												cat "$expectedResultPath"
-				                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
-												set +e
-												diff -u "$expectedResultPath" "$actualResultPath"
-												set -e
-				                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-												if ! is_pwd_working_tree_clean; then
-				                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
-												fi
-												# TODO: Optionally do not exit.
+				            # Compare actual result with expected result
+				            if [ ! -e "$expectedResultPath" ]; then
+				                echo >&2 "$(BO_cecho "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
 				                exit 1
 				            fi
 
-				  		      echo "$(BO_cecho "[bash.origin.test] Successful Test" GREEN BOLD)"
-								fi
-		        else
+										if grep -Fxq ">>>SKIP_TEST<<<" "$actualResultPath"; then
 
-								echo "[bash.origin.test] Recording test session in '.expected.log' files."
+						  		      echo "$(BO_cecho "[bash.origin.test] Skipped Test" YELLOW BOLD)"
 
-		            # Keep actual result as expected result
-		            cp -f "$actualResultPath" "$expectedResultPath"
+										else
 
-		  		      echo "$(BO_cecho "[bash.origin.test] Test result recorded. Commit changes to git!" YELLOW BOLD)"
-		        fi
+												if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
+						                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+						                echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
+						                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+						                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
+						                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
+						                echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
+						                echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
+														cat "$rawResultPath"
+						                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
+														cat "$actualResultPath"
+						                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
+														cat "$expectedResultPath"
+						                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
+														set +e
+														diff -u "$expectedResultPath" "$actualResultPath"
+														set -e
+						                echo "$(BO_cecho "| ##################################################" RED BOLD)"
+														if ! is_pwd_working_tree_clean; then
+						                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
+														fi
+														# TODO: Optionally do not exit.
+						                exit 1
+						            fi
+
+						  		      echo "$(BO_cecho "[bash.origin.test] Successful Test" GREEN BOLD)"
+										fi
+				        else
+
+										echo "[bash.origin.test] Recording test session in '.expected.log' files."
+
+				            # Keep actual result as expected result
+				            cp -f "$actualResultPath" "$expectedResultPath"
+
+				  		      echo "$(BO_cecho "[bash.origin.test] Test result recorded. Commit changes to git!" YELLOW BOLD)"
+				        fi
+						fi
 				popd > /dev/null
 
         BO_format "${VERBOSE}" "FOOTER"
@@ -334,6 +342,11 @@ function init {
 						[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Look for test root scripts in: $(pwd) / * / main*"
 
 						for mainpath in */main*; do
+
+								if ! echo "$mainpath" | grep -q -Ee '\/main(\.sh)?$'; then
+										continue
+								fi
+
 	            	runTest "$(dirname "$mainpath")"
 						done
 				else
