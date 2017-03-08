@@ -98,9 +98,9 @@ function init {
 
 		# @source http://stackoverflow.com/a/3879077/330439
 		function is_pwd_working_tree_clean {
-				if echo "$@" | grep -q -Ee '(\$|\s*)--ignore-dirt(\s*|\$)'; then
+				if echo "$@" | grep -q -Ee '(\$|\s*)--ignore-dirty?(\s*|\$)'; then
 						return 0
-				elif echo "$npm_config_argv" | grep -q -Ee '"--ignore-dirt"'; then
+				elif echo "$npm_config_argv" | grep -q -Ee '"--ignore-dirty?"'; then
 						return 0
 				fi
 				# TODO: Only stop if sub-path is dirty (use bash.origin.git to get git root and use helper)
