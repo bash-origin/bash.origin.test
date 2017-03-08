@@ -1,6 +1,6 @@
 {
     "name": "bash.origin.test",
-    "version": "0.1.17",
+    "version": "0.1.18",
     "repository": "https://github.com/bash-origin/bash.origin.test.git",
     "bin": {
         "bash.origin.test": "tests/run.sh"
