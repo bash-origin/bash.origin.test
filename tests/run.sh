@@ -24,27 +24,49 @@ function ensureBash4 {
 
 		export BO_BASH=$(which bash)
 
+		function installBashOrExit  {
+			INSTALL_BASH=0
+			if echo "$@" | grep -q -Ee '(\$|\s*)--install-bash(\s*|\$)'; then
+				INSTALL_BASH=1
+			elif echo "$npm_config_argv" | grep -q -Ee '"--install-bash"'; then
+				INSTALL_BASH=1
+			fi
+			if [ $INSTALL_BASH == 1 ]; then
+				if [[ $OSTYPE == *"darwin"* ]]; then
+					# OSX
+					echo "Installing 'bash' using 'brew' ..."
+					# @see https://johndjameson.com/blog/updating-your-shell-with-homebrew/
+					brew install bash
+					export SHELL="/usr/local/bin/bash"
+				else
+					echo >&2 "ERROR: Cannot determine how to install bash version 4 for your OS '$OSTYPE'!"
+					exit 1
+				fi
+			else
+				echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
+				exit 1
+			fi
+		}
+
 		if [[ "$SHELL" != *"/bash" ]]; then
 		    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
-						echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
-						exit 1
-				fi
-				export _BO_TEST_LAUNCHED_BASH_4="1"
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
-				SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
-				exit 0
+				installBashOrExit "$@"
+			fi
+			export _BO_TEST_LAUNCHED_BASH_4="1"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
+			SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
+			exit 0
 		fi
 		if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
 		    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
-						echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
-						exit 1
-				fi
-				export _BO_TEST_LAUNCHED_BASH_4="1"
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
-				SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
-				exit 0
+				installBashOrExit "$@"
+			fi
+			export _BO_TEST_LAUNCHED_BASH_4="1"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Launching '$__BO_DIR__/run.sh' using '$BO_BASH'"
+			SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
+			exit 0
 		fi
 }
 ensureBash4 "$@"

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] START args: $@"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] BO_LOADED: $BO_LOADED"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Souring 'bash.origin BOE'"
 . bash.origin BOE
 cmd="$1"
 shift
