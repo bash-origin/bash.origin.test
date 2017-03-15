@@ -83,8 +83,20 @@ ensureBash4 "$@"
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Original BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then
-		BO_ROOT_SCRIPT_PATH="$__BO_DIR__/../node_modules/bash.origin/bash.origin"
+		if [ -e "$__BO_DIR__/../node_modules/bash.origin/bash.origin" ]; then
+				BO_ROOT_SCRIPT_PATH="$__BO_DIR__/../node_modules/bash.origin/bash.origin"
+		fi
 fi
+if [ ! -e "$BO_ROOT_SCRIPT_PATH" ] && [ "$BO_ROOT_SCRIPT_PATH" == "$(pwd)/node_modules/bash.origin/bash.origin" ]; then
+		if [ -e "$(pwd)/bash.origin" ]; then
+				# We are testing bash.origin package which should use itself
+				BO_ROOT_SCRIPT_PATH="$(pwd)/bash.origin"
+		elif [ -e "$(pwd)/.bash.origin" ]; then
+				# The package is including it's own custom bash.origin source
+				BO_ROOT_SCRIPT_PATH="$(pwd)/.bash.origin"
+		fi
+fi
+
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Using BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 
 if [ ! -e "$HOME/.bash.origin" ]; then
