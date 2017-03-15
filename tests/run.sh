@@ -212,8 +212,12 @@ function init {
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
+
 								# Remove sections to be ignored
 								sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
+									# cleanup remaining keyworkds in case multiple sections were nested
+									sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
+
 
 								# Make paths in result relative
 
