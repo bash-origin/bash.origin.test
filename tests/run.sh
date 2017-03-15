@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_VERBOSE: $BO_VERBOSE"
+[ -z "$BO_TRACE" ] || echo "[bash.origin.test][run.sh] BO_TRACE: $BO_TRACE"
+
+[ -z "$BO_TRACE" ] || echo -e "[bash.origin.test][run.sh] printenv:\n$(printenv)"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] pwd: $(pwd)"
+
+
 function ensureBash4 {
 		BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
@@ -39,11 +46,11 @@ function ensureBash4 {
 					brew install bash
 					export SHELL="/usr/local/bin/bash"
 				else
-					echo >&2 "ERROR: Cannot determine how to install bash version 4 for your OS '$OSTYPE'!"
+					echo >&2 "[bash.origin.test][run.sh] ERROR: Cannot determine how to install bash version 4 for your OS '$OSTYPE'!"
 					exit 1
 				fi
 			else
-				echo >&2 "ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
+				echo >&2 "[bash.origin.test][run.sh] ERROR: bash version 4 required! (BO_BASH: $BO_BASH)"
 				exit 1
 			fi
 		}
@@ -71,8 +78,8 @@ function ensureBash4 {
 }
 ensureBash4 "$@"
 
-
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH --version: $($BO_BASH --version)"
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Original BO_ROOT_SCRIPT_PATH: $BO_ROOT_SCRIPT_PATH"
 if [ -z "$BO_ROOT_SCRIPT_PATH" ]; then
@@ -99,7 +106,7 @@ if [ -z "${BO_LOADED}" ]; then
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . $__BO_DIR__/../node_modules/bash.origin/bash.origin"
 				. "$__BO_DIR__/../node_modules/bash.origin/bash.origin"
 		else
-				echo >&2 "ERROR: 'bash.origin' could not be found!"
+				echo >&2 "[bash.origin.test][run.sh] ERROR: 'bash.origin' could not be found!"
 				exit 1
 		fi
 fi
@@ -171,13 +178,13 @@ function init {
 								testRootFile="$(pwd)/main"
 						fi
 						if [ ! -e "$testRootFile" ]; then
-									echo >&2 "$(BO_cecho "ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
+									echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
 									exit 1
 						fi
 
 						if [[ ! -x "$testRootFile" ]]; then
 		        		if [ $RECORD == 0 ]; then
-										echo >&2 "$(BO_cecho "ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
+										echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
 										exit 1
 								else
 										echo "Making test entry point '$testRootFile' executable. (pwd: $(pwd))"
@@ -233,7 +240,7 @@ function init {
 
 								if [ ! -s "$actualResultPath" ]; then
 
-										echo >&2 "$(BO_cecho "ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
+										echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
 
 										echo "'which env': $(which env)"
 										echo "'which bash.origin': $(which bash.origin)"
@@ -261,7 +268,7 @@ function init {
 
 				            # Compare actual result with expected result
 				            if [ ! -e "$expectedResultPath" ]; then
-				                echo >&2 "$(BO_cecho "ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
+				                echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
 				                exit 1
 				            fi
 
@@ -321,7 +328,7 @@ function init {
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testName: $testName"
 
 		if [ ! -d "$testBaseDir" ]; then
-				echo >&2 "$(BO_cecho "ERROR: Directory '$testBaseDir' not found! (pwd: $(pwd))" RED BOLD)"
+				echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Directory '$testBaseDir' not found! (pwd: $(pwd))" RED BOLD)"
 				exit 1
 		fi
 
@@ -349,7 +356,7 @@ function init {
 
 				if [ $RECORD == 1 ]; then
 						if ! is_pwd_working_tree_clean; then
-								echo >&2 "$(BO_cecho "ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
+								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
 								exit 1
 						fi
 		        git clean -d -x -f > /dev/null

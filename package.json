@@ -5,10 +5,10 @@
     "bin": {
         "bash.origin.test": "tests/run.sh"
     },
-    "scripts": {
-        "test": "tests/run.sh tests"
-    },
     "dependencies": {
-        "bash.origin": "^0.1.48"
+        "bash.origin": "^0.1.49"
+    },
+    "scripts": {
+        "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin tests/run.sh tests"
     }
 }
