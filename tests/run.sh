@@ -164,7 +164,7 @@ function init {
 
         BO_format "${VERBOSE}" "HEADER" "Run test: $testName"
 
-	      echo "$(BO_cecho "Test: $testName" WHITE BOLD)"
+	      echo "$(BO_cecho "[bash.origin.test] Test: $testName" WHITE BOLD)"
 
 				pushd "$testName" > /dev/null
 
@@ -284,13 +284,13 @@ function init {
 
 				            # Compare actual result with expected result
 				            if [ ! -e "$expectedResultPath" ]; then
-				                echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Expected result not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
+				                echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Expected result for $testName not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
 				                exit 1
 				            fi
 
 										if grep -Fxq ">>>SKIP_TEST<<<" "$actualResultPath"; then
 
-						  		      echo "$(BO_cecho "[bash.origin.test] Skipped Test" YELLOW BOLD)"
+						  		      echo "$(BO_cecho "[bash.origin.test] Skipped $testName Test" YELLOW BOLD)"
 
 										else
 
@@ -319,16 +319,16 @@ function init {
 						                exit 1
 						            fi
 
-						  		      echo "$(BO_cecho "[bash.origin.test] Successful Test" GREEN BOLD)"
+						  		      echo "$(BO_cecho "[bash.origin.test] Successful: $testName" GREEN BOLD)"
 										fi
 				        else
 
-										echo "[bash.origin.test] Recording test session in '.expected.log' files."
+										echo "[bash.origin.test] Recording test session for $testName in '.expected.log' files."
 
 				            # Keep actual result as expected result
 				            cp -f "$actualResultPath" "$expectedResultPath"
 
-				  		      echo "$(BO_cecho "[bash.origin.test] Test result recorded. Commit changes to git!" YELLOW BOLD)"
+				  		      echo "$(BO_cecho "[bash.origin.test] Test result recorded for $testName. Commit changes to git!" YELLOW BOLD)"
 				        fi
 						fi
 				popd > /dev/null
