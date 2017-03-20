@@ -131,10 +131,15 @@ function init {
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] init()"
 
 
+		# Source profile to get access to path variables
+		# TODO: Save all ENV variables except for PATH?
+		BO_ENABLE_SOURCE_PROFILE=1
+		BO_sourceProfile
+
+
 		# Ensure 'bash.origin' is on path (will be place in NVM bin dir`)
 		# TODO: Ensure 'bash.origin' bin using own helper.
 		BO_ensure_nvm
-
 
 
 		# @source http://stackoverflow.com/a/3879077/330439
