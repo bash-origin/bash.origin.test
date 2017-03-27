@@ -145,23 +145,32 @@ function init {
 
 		# @source http://stackoverflow.com/a/3879077/330439
 		function is_pwd_working_tree_clean {
-				if echo "$@" | grep -q -Ee '(\$|\s*)--ignore-dirty?(\s*|\$)'; then
-						return 0
-				elif echo "$npm_config_argv" | grep -q -Ee '"--ignore-dirty?"'; then
-						return 0
-				fi
-				# TODO: Only stop if sub-path is dirty (use bash.origin.git to get git root and use helper)
+			if echo "$@" | grep -q -Ee '(\$|\s*)--ignore-dirty?(\s*|\$)'; then
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] is_pwd_working_tree_clean() 'true' due to --ignore-dirty"
+				return 0
+			elif echo "$npm_config_argv" | grep -q -Ee '"--ignore-dirty?"'; then
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] is_pwd_working_tree_clean() 'true' due to --ignore-dirty"
+				return 0
+			fi
+			# TODO: Only stop if sub-path is dirty (use bash.origin.git to get git root and use helper)
 		    # Update the index
 		    git update-index -q --ignore-submodules --refresh
 		    # Disallow unstaged changes in the working tree
 		    if ! git diff-files --quiet --ignore-submodules --; then
-						return 1
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] is_pwd_working_tree_clean() 'false' due to unstaged changes"
+				return 1
 		    fi
 		    # Disallow uncommitted changes in the index
 		    if ! git diff-index --cached --quiet HEAD --ignore-submodules --; then
-						return 1
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] is_pwd_working_tree_clean() 'false' due to uncommitted changes"
+				return 1
 		    fi
-				return 0
+			if [[ ! -z $(git status -s) ]]; then
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] is_pwd_working_tree_clean() 'false' due to 'git status -s'"
+				return 1
+			fi
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] is_pwd_working_tree_clean() 'true'"
+			return 0
 		}
 
 
@@ -193,21 +202,21 @@ function init {
 		        # Run test and record actual result
 						testRootFile="$(pwd)/main.sh"
 						if [ ! -e "$testRootFile" ]; then
-								testRootFile="$(pwd)/main"
+							testRootFile="$(pwd)/main"
 						fi
 						if [ ! -e "$testRootFile" ]; then
-									echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
-									exit 1
+							echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
+							exit 1
 						fi
 
 						if [[ ! -x "$testRootFile" ]]; then
 		        		if [ $RECORD == 0 ]; then
-										echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
-										exit 1
-								else
-										echo "Making test entry point '$testRootFile' executable. (pwd: $(pwd))"
-										chmod u+x "$testRootFile"
-							  fi
+								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
+								exit 1
+							else
+								echo "Making test entry point '$testRootFile' executable. (pwd: $(pwd))"
+								chmod u+x "$testRootFile"
+							fi
 						fi
 
 						function invokeTest {
@@ -221,8 +230,8 @@ function init {
 
 								# Remove sections to be ignored
 								sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
-									# cleanup remaining keyworkds in case multiple sections were nested
-									sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
+								# cleanup remaining keyworkds in case multiple sections were nested
+								sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
 
 
 								# Make paths in result relative
@@ -363,7 +372,7 @@ function init {
 						export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
 				fi
 
-		    local RECORD=0
+		   		local RECORD=0
 
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
@@ -377,15 +386,36 @@ function init {
 
 
 				if [ $RECORD == 1 ]; then
-						if ! is_pwd_working_tree_clean; then
-								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
-								exit 1
+					if ! is_pwd_working_tree_clean; then
+						echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
+						exit 1
+					fi
+
+					uncleanFiles=$(git clean -d -x -f --dry-run "$testBaseDir")
+					if [ ! -z "$uncleanFiles" ]; then
+						echo "Unclean files:"
+						echo
+						echo "$uncleanFiles"
+						echo
+						read -p "$(BO_cecho "Remove the above files before running test? [y|n]" WHITE BOLD)" -n 1 -r
+						echo
+						if [[ $REPLY =~ ^[Yy]$ ]]; then
+							git clean -d -x -f "$testBaseDir"
+						else
+							echo "Aborted"
+							exit 0
 						fi
-		        git clean -d -x -f > /dev/null
+					fi
 				else
+					if echo "$@" | grep -q -Ee '(\$|\s*)--dev(\s*|\$)'; then
+						echo "$(BO_cecho "[bash.origin.test] Skip clean. Running in dev mode." YELLOW BOLD)"
+					elif echo "$npm_config_argv" | grep -q -Ee '"--dev"'; then
+						echo "$(BO_cecho "[bash.origin.test] Skip clean. Running in dev mode." YELLOW BOLD)"
+					else
 						if is_pwd_working_tree_clean; then
-		        		git clean -d -x -f > /dev/null
+							git clean -d -x -f "$testBaseDir" > /dev/null
 						fi
+					fi
 				fi
 
 				if [ -z "$testName" ]; then

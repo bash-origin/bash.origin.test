@@ -6,7 +6,7 @@
         "bash.origin.test": "tests/run.sh"
     },
     "dependencies": {
-        "bash.origin": "^0.1.55"
+        "bash.origin": "^0.1.56"
     },
     "scripts": {
         "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin tests/run.sh tests"
