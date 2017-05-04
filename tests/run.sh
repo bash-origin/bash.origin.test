@@ -212,7 +212,7 @@ function init {
 						fi
 
 						if [[ ! -x "$testRootFile" ]]; then
-		        		if [ $BO_TEST_FLAG_RECORD != 1 ]; then
+		        			if [[ $BO_TEST_FLAG_RECORD != 1 ]]; then
 								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
 								exit 1
 							else
@@ -300,7 +300,7 @@ function init {
 								fi
 
 
-				        if [ $BO_TEST_FLAG_RECORD != 1 ]; then
+				        if [[ $BO_TEST_FLAG_RECORD != 1 ]]; then
 
 				            # Compare actual result with expected result
 				            if [ ! -e "$expectedResultPath" ]; then
@@ -404,7 +404,7 @@ function init {
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
 
-				if [ $BO_TEST_FLAG_RECORD == 1 ]; then
+				if [[ $BO_TEST_FLAG_RECORD == 1 ]]; then
 					if ! is_pwd_working_tree_clean; then
 						# TODO: If only '.expected.log' files are unclean we ignore them, treat working
 						#       directory as clean and add file list to clean below.
