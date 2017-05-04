@@ -183,23 +183,25 @@ function init {
 
 				pushd "$testName" > /dev/null
 
-		        local rawResultPath=".actual.raw.log"
-		        local actualResultPath=".actual.log"
-		        local expectedResultPath=".expected.log"
+					local rawResultPath=".actual.raw.log"
+					local actualResultPath=".actual.log"
+					local expectedResultPath=".expected.log"
 
 
-						if [ ! -e "$expectedResultPath" ]; then
-								# If no expected result is found we generate it
-								RECORD=1
-		  		      echo "$(BO_cecho "[bash.origin.test] No expected test result found. Recording it ..." YELLOW BOLD)"
-						fi
+					if [ ! -e "$expectedResultPath" ]; then
+						# If no expected result is found we generate it
+						RECORD=1
+						echo "$(BO_cecho "[bash.origin.test] No expected test result found. Recording it ..." YELLOW BOLD)"
+					fi
 
 
-						# TODO: Add actual files to ignore rules at git root using bash.origin.git (only if --record)
+
+					# TODO: Add actual files to ignore rules at git root using bash.origin.git (only if --record)
 
 
-		        BO_resetLoaded
-		        # Run test and record actual result
+			        BO_resetLoaded
+			        # Run test and record actual result
+		
 						testRootFile="$(pwd)/main.sh"
 						if [ ! -e "$testRootFile" ]; then
 							testRootFile="$(pwd)/main"
@@ -221,9 +223,12 @@ function init {
 
 						function invokeTest {
 
+							export BO_TEST_PACKAGE_PATH="$__BO_DIR__/.."
+							export BO_TEST_RAW_RESULT_PATH="$(pwd)/$rawResultPath"
+
 								# TODO: Write wrapper for 'testRootFile' that will log error message
 								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
-				        "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile" | tee "$rawResultPath"
+				        "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile" 2>&1 | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
@@ -263,10 +268,10 @@ function init {
 
 						invokeTest
 
-						if echo "$@" | grep -q -Ee '(\$|\s*)--dev(\s*|\$)'; then
-		  		      echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in dev mode." YELLOW BOLD)"
-						elif echo "$npm_config_argv" | grep -q -Ee '"--dev"'; then
-		  		      echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in dev mode." YELLOW BOLD)"
+						if [[ $BO_TEST_FLAG_DEV == 1 ]]; then
+							echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in dev mode." YELLOW BOLD)"
+						elif [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
+							echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in profile mode." YELLOW BOLD)"
 						else
 
 								if [ ! -s "$actualResultPath" ]; then
@@ -363,6 +368,22 @@ function init {
 				exit 1
 		fi
 
+
+		if echo "$@" | grep -q -Ee '(\$|\s*)--profile(\s*|\$)'; then
+			export BO_TEST_FLAG_PROFILE=1
+		elif echo "$npm_config_argv" | grep -q -Ee '"--profile"'; then
+			export BO_TEST_FLAG_PROFILE=1
+		fi
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_PROFILE: $BO_TEST_FLAG_PROFILE"
+
+		if echo "$@" | grep -q -Ee '(\$|\s*)--dev(\s*|\$)'; then
+			export BO_TEST_FLAG_DEV=1
+		elif echo "$npm_config_argv" | grep -q -Ee '"--dev"'; then
+			export BO_TEST_FLAG_DEV=1
+		fi
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_DEV: $BO_TEST_FLAG_DEV"
+
+
 		pushd "$testBaseDir" > /dev/null
 
 				if [ -z "$BO_PACKAGES_DIR" ]; then
@@ -387,6 +408,8 @@ function init {
 
 				if [ $RECORD == 1 ]; then
 					if ! is_pwd_working_tree_clean; then
+						# TODO: If only '.expected.log' files are unclean we ignore them, treat working
+						#       directory as clean and add file list to clean below.
 						echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Cannot remove all temporary test assets before recording test run because git is not clean!" RED BOLD)"
 						exit 1
 					fi
@@ -407,10 +430,10 @@ function init {
 						fi
 					fi
 				else
-					if echo "$@" | grep -q -Ee '(\$|\s*)--dev(\s*|\$)'; then
+					if [[ $BO_TEST_FLAG_DEV == 1 ]]; then
 						echo "$(BO_cecho "[bash.origin.test] Skip clean. Running in dev mode." YELLOW BOLD)"
-					elif echo "$npm_config_argv" | grep -q -Ee '"--dev"'; then
-						echo "$(BO_cecho "[bash.origin.test] Skip clean. Running in dev mode." YELLOW BOLD)"
+					elif [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
+						echo "$(BO_cecho "[bash.origin.test] Skip clean. Running in profile mode." YELLOW BOLD)"
 					else
 						if is_pwd_working_tree_clean; then
 							git clean -d -x -f "$testBaseDir" > /dev/null
