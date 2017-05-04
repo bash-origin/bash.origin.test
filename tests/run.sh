@@ -190,7 +190,7 @@ function init {
 
 					if [ ! -e "$expectedResultPath" ]; then
 						# If no expected result is found we generate it
-						RECORD=1
+						export BO_TEST_FLAG_RECORD=1
 						echo "$(BO_cecho "[bash.origin.test] No expected test result found. Recording it ..." YELLOW BOLD)"
 					fi
 
@@ -212,7 +212,7 @@ function init {
 						fi
 
 						if [[ ! -x "$testRootFile" ]]; then
-		        		if [ $RECORD == 0 ]; then
+		        		if [ $BO_TEST_FLAG_RECORD != 1 ]; then
 								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
 								exit 1
 							else
@@ -300,7 +300,7 @@ function init {
 								fi
 
 
-				        if [ $RECORD == 0 ]; then
+				        if [ $BO_TEST_FLAG_RECORD != 1 ]; then
 
 				            # Compare actual result with expected result
 				            if [ ! -e "$expectedResultPath" ]; then
@@ -383,30 +383,28 @@ function init {
 		fi
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_DEV: $BO_TEST_FLAG_DEV"
 
+		if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
+			export BO_TEST_FLAG_RECORD=1
+		elif echo "$npm_config_argv" | grep -q -Ee '"--record"'; then
+			export BO_TEST_FLAG_RECORD=1
+		fi
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_RECORD: $BO_TEST_FLAG_RECORD"
+
 
 		pushd "$testBaseDir" > /dev/null
 
 				if [ -z "$BO_PACKAGES_DIR" ]; then
-						export BO_PACKAGES_DIR="$(pwd)/.deps"
+					export BO_PACKAGES_DIR="$(pwd)/.deps"
 				fi
 				if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
-						export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
+					export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
 				fi
-
-		   		local RECORD=0
 
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
 
-				if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
-		        RECORD=1
-				elif echo "$npm_config_argv" | grep -q -Ee '"--record"'; then
-				    RECORD=1
-				fi
-
-
-				if [ $RECORD == 1 ]; then
+				if [ $BO_TEST_FLAG_RECORD == 1 ]; then
 					if ! is_pwd_working_tree_clean; then
 						# TODO: If only '.expected.log' files are unclean we ignore them, treat working
 						#       directory as clean and add file list to clean below.
