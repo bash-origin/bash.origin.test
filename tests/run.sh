@@ -140,7 +140,8 @@ function init {
 
 		# Ensure 'bash.origin' is on path (will be place in NVM bin dir`)
 		# TODO: Ensure 'bash.origin' bin using own helper.
-		BO_ensure_nvm
+		# NOTE: We also ensure 'node' here to ensure we are using a consistent version.
+		BO_ensure_node
 
 
 		# @source http://stackoverflow.com/a/3879077/330439
