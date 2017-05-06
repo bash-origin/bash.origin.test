@@ -244,23 +244,23 @@ function init {
 
 								ownPath=`echo "$(pwd)" | sed 's/\\//\\\\\\//g'`
 								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $ownPath"
-								sed -i -e "s/$ownPath//g" "$actualResultPath"
+								sed -i -e "s/$ownPath/TeStLoCaLiZeD/g" "$actualResultPath"
 
 								basePath=`echo "$testBaseDir" | sed 's/\\//\\\\\\//g'`
 								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $basePath"
-								sed -i -e "s/$basePath//g" "$actualResultPath"
+								sed -i -e "s/$basePath/TeStLoCaLiZeD/g" "$actualResultPath"
 
 								packagesDir=`echo "$BO_PACKAGES_DIR" | sed 's/\\//\\\\\\//g'`
 								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $packagesDir"
-								sed -i -e "s/$packagesDir//g" "$actualResultPath"
+								sed -i -e "s/$packagesDir/TeStLoCaLiZeD/g" "$actualResultPath"
 
 								systemDir=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
 								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $systemDir"
-								sed -i -e "s/$systemDir//g" "$actualResultPath"
+								sed -i -e "s/$systemDir/TeStLoCaLiZeD/g" "$actualResultPath"
 
 								homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
 								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $homePath"
-								sed -i -e "s/$homePath//g" "$actualResultPath"
+								sed -i -e "s/$homePath/TeStLoCaLiZeD/g" "$actualResultPath"
 
 								if [ -e "$actualResultPath-e" ]; then
 										rm "$actualResultPath-e"
