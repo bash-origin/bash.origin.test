@@ -7,4 +7,14 @@ date
 
 echo "<<<TEST_MATCH_IGNORE"
 
+
+echo "TEST_MATCH_IGNORE>>>"
+    echo "ignored 1"
+    echo "TEST_MATCH_IGNORE>>>"
+        echo "ignored 2"
+    echo "<<<TEST_MATCH_IGNORE"
+    echo "ignored 3"
+echo "<<<TEST_MATCH_IGNORE"
+
+
 echo "OK"

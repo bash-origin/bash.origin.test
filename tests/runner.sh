@@ -22,6 +22,13 @@ if [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
     BO_run_any_node "$BO_TEST_PACKAGE_PATH/lib/profile.js" --log "$BO_TEST_RAW_RESULT_PATH" profile &
     sleep 1
 fi
+
+# If the workspace root is not set we default to our test directory to ensure we get
+# stable implementation IDs based on the source file path (which is normalized relative to the workspace root).
+if [ -z "$BO_WORKSPACE_ROOT" ]; then
+    export BO_WORKSPACE_ROOT="$(pwd)"
+fi
+
 set +e
 if [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
     time {

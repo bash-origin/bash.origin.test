@@ -229,15 +229,36 @@ function init {
 
 								# TODO: Write wrapper for 'testRootFile' that will log error message
 								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
-				        "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile" 2>&1 | tee "$rawResultPath"
+						        "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile" 2>&1 | tee "$rawResultPath"
 
 								cp -f "$rawResultPath" "$actualResultPath"
 
 
 								# Remove sections to be ignored
-								sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
+								#sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
 								# cleanup remaining keyworkds in case multiple sections were nested
-								sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
+								#sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
+								# TODO: Support ignoring parts of a single line.
+								BO_run_recent_node --eval '
+									const FS = require("fs");
+									var lines = FS.readFileSync("'$actualResultPath'", "utf8").split("\n");
+									var ignoring = 0;
+									lines = lines.filter(function (line) {
+										if (/TEST_MATCH_IGNORE>>>/.test(line)) {
+											ignoring += 1;
+											return false;
+										} else
+										if (/<<<TEST_MATCH_IGNORE/.test(line)) {
+											ignoring -= 1;
+											return false;
+										} else
+										if (ignoring > 0) {
+											return false;
+										}
+										return true;
+									});
+									FS.writeFileSync("'$actualResultPath'", lines.join("\n"), "utf8");
+								'
 
 
 								# Make paths in result relative
