@@ -6,7 +6,7 @@
         "bash.origin.test": "tests/run.sh"
     },
     "dependencies": {
-        "bash.origin": "^0.1.57",
+        "bash.origin": "^0.1.60",
         "cli-table2": "^0.2.0",
         "minimist": "^1.2.0"
     },

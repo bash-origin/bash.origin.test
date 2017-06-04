@@ -1,0 +1,17 @@
+BO_TEST_RUNNER_IMPL
+
+ RUNS  ...main.js
+[K[1A[K[1A PASS  06-JavaScript-Jest/main.js
+
+ RUNS  ...main.js
+[K[1A[K[1A  ✓ Test (4ms)
+
+ RUNS  ...main.js
+[K[1A[K[1A
+
+ RUNS  ...main.js
+[K[1A[K[1ATest Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        0.644s, estimated 1s
+Ran all test suites matching "06-JavaScript-Jest/main.js".

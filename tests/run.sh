@@ -78,6 +78,7 @@ function ensureBash4 {
 }
 ensureBash4 "$@"
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] script args: $@"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH --version: $($BO_BASH --version)"
 
@@ -138,10 +139,13 @@ function init {
 		#BO_sourceProfile
 
 
-		# Ensure 'bash.origin' is on path (will be place in NVM bin dir`)
-		# TODO: Ensure 'bash.origin' bin using own helper.
-		# NOTE: We also ensure 'node' here to ensure we are using a consistent version.
-		BO_ensure_node
+		# We only run this once in the top test shell.
+		if [ -z "$BO_TEST_BASE_DIR" ]; then
+			# Ensure 'bash.origin' is on path (will be place in NVM bin dir`)
+			# TODO: Ensure 'bash.origin' bin using own helper.
+			# NOTE: We also ensure 'node' here to ensure we are using a consistent version.
+			BO_ensure_node
+		fi
 
 
 		# @source http://stackoverflow.com/a/3879077/330439
@@ -189,7 +193,7 @@ function init {
 					local expectedResultPath=".expected.log"
 
 
-					if [ ! -e "$expectedResultPath" ]; then
+					if [ ! -e "$expectedResultPath" ] && [[ $BO_TEST_FLAG_DEV != 1 ]]; then
 						# If no expected result is found we generate it
 						export BO_TEST_FLAG_RECORD=1
 						echo "$(BO_cecho "[bash.origin.test] No expected test result found. Recording it ..." YELLOW BOLD)"
@@ -208,8 +212,12 @@ function init {
 							testRootFile="$(pwd)/main"
 						fi
 						if [ ! -e "$testRootFile" ]; then
-							echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point 'main[.sh]' not found! (pwd: $(pwd))" RED BOLD)"
-							exit 1
+
+							testRootFile="$(pwd)/main.js"
+							if [ ! -e "$testRootFile" ]; then
+								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point 'main[.sh|.js]' not found! (pwd: $(pwd))" RED BOLD)"
+								exit 1
+							fi
 						fi
 
 						if [[ ! -x "$testRootFile" ]]; then
@@ -227,65 +235,66 @@ function init {
 							export BO_TEST_PACKAGE_PATH="$__BO_DIR__/.."
 							export BO_TEST_RAW_RESULT_PATH="$(pwd)/$rawResultPath"
 
-								# TODO: Write wrapper for 'testRootFile' that will log error message
-								#       if exit code not 0 so that test will fail. Currently exit codes are ignored.
-						        "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile" 2>&1 | tee "$rawResultPath"
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testRootFile: $testRootFile"
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] rawResultPath: $rawResultPath"
 
-								cp -f "$rawResultPath" "$actualResultPath"
+							BO_TEST_RUNNER_IMPL run "$testRootFile" "$rawResultPath"
 
-
-								# Remove sections to be ignored
-								#sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
-								# cleanup remaining keyworkds in case multiple sections were nested
-								#sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
-								# TODO: Support ignoring parts of a single line.
-								BO_run_recent_node --eval '
-									const FS = require("fs");
-									var lines = FS.readFileSync("'$actualResultPath'", "utf8").split("\n");
-									var ignoring = 0;
-									lines = lines.filter(function (line) {
-										if (/TEST_MATCH_IGNORE>>>/.test(line)) {
-											ignoring += 1;
-											return false;
-										} else
-										if (/<<<TEST_MATCH_IGNORE/.test(line)) {
-											ignoring -= 1;
-											return false;
-										} else
-										if (ignoring > 0) {
-											return false;
-										}
-										return true;
-									});
-									FS.writeFileSync("'$actualResultPath'", lines.join("\n"), "utf8");
-								'
+							cp -f "$rawResultPath" "$actualResultPath"
 
 
-								# Make paths in result relative
+							# Remove sections to be ignored
+							#sed -i -e '/TEST_MATCH_IGNORE>>>/,/<<<TEST_MATCH_IGNORE/d' "$actualResultPath"
+							# cleanup remaining keyworkds in case multiple sections were nested
+							#sed -i -e "/<<<TEST_MATCH_IGNORE/d" "$actualResultPath"
+							# TODO: Support ignoring parts of a single line.
+							BO_run_recent_node --eval '
+								const FS = require("fs");
+								var lines = FS.readFileSync("'$actualResultPath'", "utf8").split("\n");
+								var ignoring = 0;
+								lines = lines.filter(function (line) {
+									if (/TEST_MATCH_IGNORE>>>/.test(line)) {
+										ignoring += 1;
+										return false;
+									} else
+									if (/<<<TEST_MATCH_IGNORE/.test(line)) {
+										ignoring -= 1;
+										return false;
+									} else
+									if (ignoring > 0) {
+										return false;
+									}
+									return true;
+								});
+								FS.writeFileSync("'$actualResultPath'", lines.join("\n"), "utf8");
+							'
 
-								ownPath=`echo "$(pwd)" | sed 's/\\//\\\\\\//g'`
-								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $ownPath"
-								sed -i -e "s/$ownPath/TeStLoCaLiZeD/g" "$actualResultPath"
 
-								basePath=`echo "$testBaseDir" | sed 's/\\//\\\\\\//g'`
-								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $basePath"
-								sed -i -e "s/$basePath/TeStLoCaLiZeD/g" "$actualResultPath"
+							# Make paths in result relative
 
-								packagesDir=`echo "$BO_PACKAGES_DIR" | sed 's/\\//\\\\\\//g'`
-								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $packagesDir"
-								sed -i -e "s/$packagesDir/TeStLoCaLiZeD/g" "$actualResultPath"
+							ownPath=`echo "$(pwd)" | sed 's/\\//\\\\\\//g'`
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $ownPath"
+							sed -i -e "s/$ownPath/TeStLoCaLiZeD/g" "$actualResultPath"
 
-								systemDir=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
-								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $systemDir"
-								sed -i -e "s/$systemDir/TeStLoCaLiZeD/g" "$actualResultPath"
+							basePath=`echo "$testBaseDir" | sed 's/\\//\\\\\\//g'`
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $basePath"
+							sed -i -e "s/$basePath/TeStLoCaLiZeD/g" "$actualResultPath"
 
-								homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
-								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $homePath"
-								sed -i -e "s/$homePath/TeStLoCaLiZeD/g" "$actualResultPath"
+							packagesDir=`echo "$BO_PACKAGES_DIR" | sed 's/\\//\\\\\\//g'`
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $packagesDir"
+							sed -i -e "s/$packagesDir/TeStLoCaLiZeD/g" "$actualResultPath"
 
-								if [ -e "$actualResultPath-e" ]; then
-										rm "$actualResultPath-e"
-								fi
+							systemDir=`echo "$BO_SYSTEM_CACHE_DIR" | sed 's/\\//\\\\\\//g'`
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $systemDir"
+							sed -i -e "s/$systemDir/TeStLoCaLiZeD/g" "$actualResultPath"
+
+							homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $homePath"
+							sed -i -e "s/$homePath/TeStLoCaLiZeD/g" "$actualResultPath"
+
+							if [ -e "$actualResultPath-e" ]; then
+								rm "$actualResultPath-e"
+							fi
 						}
 
 						invokeTest
@@ -296,82 +305,82 @@ function init {
 							echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in profile mode." YELLOW BOLD)"
 						else
 
-								if [ ! -s "$actualResultPath" ]; then
+							if [ ! -s "$actualResultPath" ]; then
 
-										echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
+								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
 
-										echo "'which env': $(which env)"
-										echo "'which bash.origin': $(which bash.origin)"
-										echo "'which bash': $(which bash)"
-										echo "'bash --version': $(bash --version)"
-										echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
-										echo "PWD: $(pwd)"
-										ls -al
-		                echo "########## Test File : $testRootFile >>>"
-										cat "$testRootFile"
-		                echo "##########"
+								echo "'which env': $(which env)"
+								echo "'which bash.origin': $(which bash.origin)"
+								echo "'which bash': $(which bash)"
+								echo "'bash --version': $(bash --version)"
+								echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
+								echo "PWD: $(pwd)"
+								ls -al
+								echo "########## Test File : $testRootFile >>>"
+								cat "$testRootFile"
+								echo "##########"
 
-		                echo "| ########## EXECUTING >>>"
-								    set -x
-										BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
-								    set +x
-		                echo "<<< EXECUTING ########## |"
+								echo "| ########## EXECUTING >>>"
+								set -x
+								BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
+								set +x
+								echo "<<< EXECUTING ########## |"
 
-		                echo "[bash.origin.test] Not running more tests so you can fix issue above!"
-										exit 1
+								echo "[bash.origin.test] Not running more tests so you can fix issue above!"
+								exit 1
+							fi
+
+
+							if [[ $BO_TEST_FLAG_RECORD != 1 ]]; then
+
+								# Compare actual result with expected result
+								if [ ! -e "$expectedResultPath" ]; then
+									echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Expected result for $testName not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
+									exit 1
 								fi
 
+								if grep -Fxq ">>>SKIP_TEST<<<" "$actualResultPath"; then
 
-				        if [[ $BO_TEST_FLAG_RECORD != 1 ]]; then
+									echo "$(BO_cecho "[bash.origin.test] Skipped $testName Test" YELLOW BOLD)"
 
-				            # Compare actual result with expected result
-				            if [ ! -e "$expectedResultPath" ]; then
-				                echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Expected result for $testName not found at '$expectedResultPath'! Run tests with '--record' once to generate expected result." RED BOLD)"
-				                exit 1
-				            fi
+								else
 
-										if grep -Fxq ">>>SKIP_TEST<<<" "$actualResultPath"; then
-
-						  		      echo "$(BO_cecho "[bash.origin.test] Skipped $testName Test" YELLOW BOLD)"
-
-										else
-
-												if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
-						                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-						                echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
-						                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-						                echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
-						                echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
-						                echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
-						                echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
-														cat "$rawResultPath"
-						                echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
-														cat "$actualResultPath"
-						                echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
-														cat "$expectedResultPath"
-						                echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
-														set +e
-														diff -u "$expectedResultPath" "$actualResultPath"
-														set -e
-						                echo "$(BO_cecho "| ##################################################" RED BOLD)"
-														if ! is_pwd_working_tree_clean; then
-						                		echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
-														fi
-														# TODO: Optionally do not exit.
-						                exit 1
-						            fi
-
-						  		      echo "$(BO_cecho "[bash.origin.test] Successful: $testName" GREEN BOLD)"
+									if ! diff -q "$expectedResultPath" "$actualResultPath" > /dev/null 2>&1; then
+										echo "$(BO_cecho "| ##################################################" RED BOLD)"
+										echo "$(BO_cecho "| # ERROR: Actual result does not match expected result for test '$testName'!" RED BOLD)"
+										echo "$(BO_cecho "| ##################################################" RED BOLD)"
+										echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
+										echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
+										echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
+										echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
+										cat "$rawResultPath"
+										echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
+										cat "$actualResultPath"
+										echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
+										cat "$expectedResultPath"
+										echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
+										set +e
+										diff -u "$expectedResultPath" "$actualResultPath"
+										set -e
+										echo "$(BO_cecho "| ##################################################" RED BOLD)"
+										if ! is_pwd_working_tree_clean; then
+											echo "$(BO_cecho "| # NOTE: Before you investigate this assertion error make sure you run the test with a clean git working directory!" RED BOLD)"
 										fi
-				        else
+										# TODO: Optionally do not exit.
+										exit 1
+									fi
 
-										echo "[bash.origin.test] Recording test session for $testName in '.expected.log' files."
+									echo "$(BO_cecho "[bash.origin.test] Successful: $testName" GREEN BOLD)"
+								fi
+							else
 
-				            # Keep actual result as expected result
-				            cp -f "$actualResultPath" "$expectedResultPath"
+								echo "[bash.origin.test] Recording test session for $testName in '.expected.log' files."
 
-				  		      echo "$(BO_cecho "[bash.origin.test] Test result recorded for $testName. Commit changes to git!" YELLOW BOLD)"
-				        fi
+								# Keep actual result as expected result
+								cp -f "$actualResultPath" "$expectedResultPath"
+
+								echo "$(BO_cecho "[bash.origin.test] Test result recorded for $testName. Commit changes to git!" YELLOW BOLD)"
+				        	fi
 						fi
 				popd > /dev/null
 
@@ -379,16 +388,60 @@ function init {
     }
 
 
-		testBaseDir="$(pwd)/$1"
-		testName="$2"
+		BO_parse_args "ARGS_" "$@"
 
+
+		if [ ! -z "$ARGS_OPT_init" ]; then
+
+			testBaseDir="$(pwd)/$1"
+
+			BO_requireModule "$__BO_DIR__/../lib/init.sh" as "BO_TEST_INIT_IMPL"
+			BO_TEST_INIT_IMPL init "$testBaseDir/01-HelloWorld"
+
+			testName="01"
+		else
+
+			if [ -f "$1" ] && [ -z "$2" ]; then
+				if [[ "$(head -1 "$1")" == "#!/usr/bin/env bash.origin.test via"* ]] ; then
+					testRunnerUri="$(head -1 "$1" | perl -pe "s/^.+ via (.+)\$/\$1/")"
+					testRunnerPath="$__BO_DIR__/../lib/runners/$(echo "$testRunnerUri" | perl -pe "s/\//~/g").sh"
+
+					BO_requireModule "$testRunnerPath" as "BO_TEST_RUNNER_IMPL"
+
+					if [ ! -z "$BO_TEST_BASE_DIR" ]; then
+						testBaseDir="$BO_TEST_BASE_DIR"
+						testPath="$1"
+					else
+						testBaseDir="$(dirname $1)"
+						testPath="$1"
+					fi
+				else
+					echo "$(BO_cecho "[bash.origin.test] Test file $1 does not have a '#!/usr/bin/env bash.origin.test via ...' header!" RED BOLD)"
+					exit 1
+				fi
+			else
+				testBaseDir="$(pwd)/$1"
+				testName="$2"
+			fi
+		fi
+
+		if ! declare -F BO_TEST_RUNNER_IMPL; then
+			BO_requireModule "$__BO_DIR__/../lib/runners/bash.origin.sh" as "BO_TEST_RUNNER_IMPL"
+		fi
+
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_RUNNER_IMPL: $BO_TEST_RUNNER_IMPL"
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testBaseDir: $testBaseDir"
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testName: $testName"
 
+
 		if [ ! -d "$testBaseDir" ]; then
-				echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Directory '$testBaseDir' not found! (pwd: $(pwd))" RED BOLD)"
-				exit 1
+			echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Directory '$testBaseDir' not found! (pwd: $(pwd))" RED BOLD)"
+			exit 1
 		fi
+
+
+		export BO_TEST_BASE_DIR="$testBaseDir"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_BASE_DIR: $BO_TEST_BASE_DIR"
 
 
 		if echo "$@" | grep -q -Ee '(\$|\s*)--profile(\s*|\$)'; then
@@ -415,16 +468,25 @@ function init {
 
 		pushd "$testBaseDir" > /dev/null
 
-				if [ -z "$BO_PACKAGES_DIR" ]; then
-					export BO_PACKAGES_DIR="$(pwd)/.deps"
-				fi
-				if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
-					export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
-				fi
+			if [ -z "$BO_PACKAGES_DIR" ]; then
+				export BO_PACKAGES_DIR="$(pwd)/.deps"
+			fi
+			if [ -z "$BO_SYSTEM_CACHE_DIR" ]; then
+				export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
+			fi
 
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+
+
+			if [ -e "$testPath" ]; then
+
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testPath: $testPath"
+
+				BO_TEST_RUNNER_IMPL run "$testPath"
+
+			else
 
 				if [[ $BO_TEST_FLAG_RECORD == 1 ]]; then
 					if ! is_pwd_working_tree_clean; then
@@ -445,8 +507,7 @@ function init {
 						if [[ $REPLY =~ ^[Yy]$ ]]; then
 							git clean -d -x -f "$testBaseDir"
 						else
-							echo "Aborted"
-							exit 0
+							echo "Ignoring files. Continuing ..."
 						fi
 					fi
 				else
@@ -463,27 +524,28 @@ function init {
 
 				if [ -z "$testName" ]; then
 
-						[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Look for test root scripts in: $(pwd) / * / main*"
+					[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Look for test root scripts in: $(pwd)/*/main*"
 
-						for mainpath in */main*; do
+					for mainpath in */main*; do
 
-								if ! echo "$mainpath" | grep -q -Ee '\/main(\.sh)?$'; then
-										continue
-								fi
-
-	            	runTest "$(dirname "$mainpath")"
-						done
-				else
-						if [ ! -d "$testName-"* ]; then
-								echo >&2 "$(BO_cecho "ERROR: Cannot find test with prefix '$testName-'" RED BOLD)"
-								exit 1
+						if ! echo "$mainpath" | grep -q -Ee '\/main(\.sh|\.js)?$'; then
+							continue
 						fi
-						pushd "$testName-"* > /dev/null
 
-		            runTest "$(echo "$mainpath" | sed 's/\/main$//')"
+						runTest "$(dirname "$mainpath")"
+					done
+				else
+					if [ ! -d "$testName-"* ]; then
+						echo >&2 "$(BO_cecho "ERROR: Cannot find test with prefix '$testName-'" RED BOLD)"
+						exit 1
+					fi
+					pushd "$testName-"* > /dev/null
 
-						popd > /dev/null
+						runTest "$(echo "$mainpath" | sed 's/\/main$//')"
+
+					popd > /dev/null
 				fi
+			fi
 		popd > /dev/null
 }
 init "$@"

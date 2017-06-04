@@ -1,0 +1,11 @@
+{
+    "name": "%%%NAME%%%",
+    "version": "0.0.0",
+    "dependencies": {
+        "bash.origin.test": "^%%%BASH_ORIGIN_TEST_VERSION%%%",
+        "bash.origin": "^%%%BASH_ORIGIN_VERSION%%%"
+    },
+    "scripts": {
+        "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin bash.origin.test %%%TESTS_SEARCH_PATH%%%"
+    }
+}

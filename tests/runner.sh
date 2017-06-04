@@ -10,13 +10,20 @@ shift
 # TODO: Remove once 'bash.origin' is on bin path automatically
 BO_ensure_nvm
 
+[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Header for file $cmd: $(head -1 "$cmd")"
+
 if [[ "$(head -1 "$cmd")" == "#!/usr/bin/env bash.origin.script"* ]] ; then
     binName="$(which bash.origin.script)"
 else
-    binName="$(which bash.origin)"
+    if [[ "$(head -1 "$cmd")" == "#!/usr/bin/env bash.origin.test"* ]] ; then
+        binName="$BO_TEST_PACKAGE_PATH/tests/run.sh"
+    else
+        binName="$(which bash.origin)"
+    fi
 fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Calling: $binName $cmd $@"
+
 BO_format "${BO_VERBOSE}" "HEADER" "Running: $binName $cmd"
 if [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
     BO_run_any_node "$BO_TEST_PACKAGE_PATH/lib/profile.js" --log "$BO_TEST_RAW_RESULT_PATH" profile &

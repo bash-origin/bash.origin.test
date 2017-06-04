@@ -1,0 +1,24 @@
+BO_TEST_RUNNER_IMPL
+>>>IGNORE_LINE:^Time:\s+\d<<<
+
+[0;36m[Main] Test Suite[0m
+[0;35m=====================[0m
+
+Running:  [0;32mDemo test Google[0m
+ [0;32m✔[0m Element <body> was visible after 95 milliseconds.
+ [0;32m✔[0m Element <button[name=btnG]> was visible after 64 milliseconds.
+ [0;32m✔[0m Testing if element <#main> contains text: "Night Watch".
+
+[0;32mOK.[0m [0;32m3[0m assertions passed. (6.461s)
+
+
+[0;36m[Main] Test Suite[0m
+[0;35m=====================[0m
+
+Running:  [0;32mDemo test Google[0m
+ [0;32m✔[0m Element <body> was visible after 39 milliseconds.
+ [0;32m✔[0m Element <button[name=btnG]> was visible after 39 milliseconds.
+ [0;32m✔[0m Testing if element <#main> contains text: "Night Watch".
+
+[0;32mOK.[0m [0;32m3[0m assertions passed. (4.857s)
+
