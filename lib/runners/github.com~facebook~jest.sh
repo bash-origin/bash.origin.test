@@ -20,6 +20,9 @@ function EXPORTS_run {
     [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~facebook~jest] testRelpath: $testRelpath"
 
     echo ">>>TEST_IGNORE_LINE:^Time:\s+\d<<<"
+    echo ">>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<"
+
+    export NODE_PATH="$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules:$NODE_PATH"
 
     "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/jest" "$testRelpath" --config={
         "rootDir": "$workingDir",

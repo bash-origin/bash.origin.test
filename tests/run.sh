@@ -108,7 +108,8 @@ fi
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_LOADED: ${BO_LOADED}"
 
 # Source https://github.com/cadorn/bash.origin
-if [ -z "${BO_LOADED}" ]; then
+if [ -z "${BO_LOADED}" ] || ! declare -F BO_echo; then
+		BO_LOADED=
 		if type bash.origin > /dev/null 2>&1; then
 				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Running: . bash.origin BOE (which bash.origin: $(which bash.origin))"
 				. bash.origin BOE
@@ -252,7 +253,28 @@ function init {
 								const FS = require("fs");
 								var lines = FS.readFileSync("'$actualResultPath'", "utf8").split("\n");
 								var ignoring = 0;
+								var dynamicIgnoreRules = [];
 								lines = lines.filter(function (line) {
+
+									//>>>TEST_IGNORE_LINE:<REG_EXP><<<
+									if (/^>>>TEST_IGNORE_LINE:(.+?)<<<$/.test(line)) {
+										dynamicIgnoreRules.push(
+											new RegExp(line.match(/^>>>TEST_IGNORE_LINE:(.+?)<<<$/)[1])
+										);
+									}
+									if (dynamicIgnoreRules.length > 0) {
+										var ignore = false;
+										dynamicIgnoreRules.forEach(function (re) {
+											if (ignore) return;
+											if (re.test(line)) {
+												ignore = true;
+											}
+										});
+										if (ignore) {
+											return false;
+										}
+									}
+
 									if (/TEST_MATCH_IGNORE>>>/.test(line)) {
 										ignoring += 1;
 										return false;
@@ -388,8 +410,7 @@ function init {
     }
 
 
-		BO_parse_args "ARGS_" "$@"
-
+		BO_parse_args "ARGS" "$@"
 
 		if [ ! -z "$ARGS_OPT_init" ]; then
 
@@ -402,9 +423,17 @@ function init {
 		else
 
 			if [ -f "$1" ] && [ -z "$2" ]; then
+
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Scan head for '#!/usr/bin/env bash.origin.test via ...'"
+
 				if [[ "$(head -1 "$1")" == "#!/usr/bin/env bash.origin.test via"* ]] ; then
 					testRunnerUri="$(head -1 "$1" | perl -pe "s/^.+ via (.+)\$/\$1/")"
+
+					[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testRunnerUri: $testRunnerUri"
+
 					testRunnerPath="$__BO_DIR__/../lib/runners/$(echo "$testRunnerUri" | perl -pe "s/\//~/g").sh"
+
+					[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testRunnerPath: $testRunnerPath"
 
 					BO_requireModule "$testRunnerPath" as "BO_TEST_RUNNER_IMPL"
 
@@ -426,6 +455,7 @@ function init {
 		fi
 
 		if ! declare -F BO_TEST_RUNNER_IMPL; then
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Load default 'BO_TEST_RUNNER_IMPL'"
 			BO_requireModule "$__BO_DIR__/../lib/runners/bash.origin.sh" as "BO_TEST_RUNNER_IMPL"
 		fi
 
@@ -496,18 +526,20 @@ function init {
 						exit 1
 					fi
 
-					uncleanFiles=$(git clean -d -x -f --dry-run "$testBaseDir")
-					if [ ! -z "$uncleanFiles" ]; then
-						echo "Unclean files:"
-						echo
-						echo "$uncleanFiles"
-						echo
-						read -p "$(BO_cecho "Remove the above files before running test? [y|n]" WHITE BOLD)" -n 1 -r
-						echo
-						if [[ $REPLY =~ ^[Yy]$ ]]; then
-							git clean -d -x -f "$testBaseDir"
-						else
-							echo "Ignoring files. Continuing ..."
+					if [[ $BO_TEST_SKIP_CLEAN != 1 ]]; then
+						uncleanFiles=$(git clean -d -x -f --dry-run "$testBaseDir")
+						if [ ! -z "$uncleanFiles" ]; then
+							echo "Unclean files:"
+							echo
+							echo "$uncleanFiles"
+							echo
+							read -p "$(BO_cecho "Remove the above files before running test? [y|n]" WHITE BOLD)" -n 1 -r
+							echo
+							if [[ $REPLY =~ ^[Yy]$ ]]; then
+								git clean -d -x -f "$testBaseDir"
+							else
+								echo "Ignoring files. Continuing ..."
+							fi
 						fi
 					fi
 				else
