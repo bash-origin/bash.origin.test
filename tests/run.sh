@@ -329,7 +329,11 @@ function init {
 
 							if [ ! -s "$actualResultPath" ]; then
 
-								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty! Re-running in verbose mode." RED BOLD)"
+								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty!" RED BOLD)"
+
+								# TODO: If no terminal attached we should exit
+								read -p "$(BO_cecho "[bash.origin.test][run.sh] Press any key to re-run in verbose mode?" RED BOLD)" -n 1 -r
+								echo
 
 								echo "'which env': $(which env)"
 								echo "'which bash.origin': $(which bash.origin)"
@@ -374,8 +378,14 @@ function init {
 										echo "$(BO_cecho "| # $(ls -al "$expectedResultPath")" RED BOLD)"
 										echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
 										echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
-										echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
-										cat "$rawResultPath"
+
+										# TODO: If no terminal attached we should exit
+										echo "$(BO_cecho "|" RED BOLD)"
+										read -p "$(BO_cecho "| Press any key to show ACTUAL & EXPECTED results as well as DIFF?" RED BOLD)" -n 1 -r
+										echo "$(BO_cecho "|" RED BOLD)"
+
+										#echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
+										#cat "$rawResultPath"
 										echo "$(BO_cecho "| ########## ACTUAL : $actualResultPath >>>" RED BOLD)"
 										cat "$actualResultPath"
 										echo "$(BO_cecho "| ########## EXPECTED : $expectedResultPath >>>" RED BOLD)"
@@ -402,6 +412,7 @@ function init {
 								cp -f "$actualResultPath" "$expectedResultPath"
 
 								echo "$(BO_cecho "[bash.origin.test] Test result recorded for $testName. Commit changes to git!" YELLOW BOLD)"
+								exit 0
 				        	fi
 						fi
 				popd > /dev/null
@@ -454,7 +465,7 @@ function init {
 			fi
 		fi
 
-		if ! declare -F BO_TEST_RUNNER_IMPL; then
+		if ! declare -F BO_TEST_RUNNER_IMPL > /dev/null; then
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Load default 'BO_TEST_RUNNER_IMPL'"
 			BO_requireModule "$__BO_DIR__/../lib/runners/bash.origin.sh" as "BO_TEST_RUNNER_IMPL"
 		fi
@@ -487,6 +498,13 @@ function init {
 			export BO_TEST_FLAG_DEV=1
 		fi
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_DEV: $BO_TEST_FLAG_DEV"
+
+		if echo "$@" | grep -q -Ee '(\$|\s*)--inspect(\s*|\$)'; then
+			export BO_TEST_FLAG_INSPECT=1
+		elif echo "$npm_config_argv" | grep -q -Ee '"--inspect"'; then
+			export BO_TEST_FLAG_INSPECT=1
+		fi
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_INSPECT: $BO_TEST_FLAG_INSPECT"
 
 		if echo "$@" | grep -q -Ee '(\$|\s*)--record(\s*|\$)'; then
 			export BO_TEST_FLAG_RECORD=1
@@ -555,6 +573,7 @@ function init {
 				fi
 
 				if [ -z "$testName" ]; then
+					# Run all tests
 
 					[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Look for test root scripts in: $(pwd)/*/main*"
 
@@ -567,17 +586,54 @@ function init {
 						runTest "$(dirname "$mainpath")"
 					done
 				else
-					if [ ! -d "$testName-"* ]; then
-						echo >&2 "$(BO_cecho "ERROR: Cannot find test with prefix '$testName-'" RED BOLD)"
-						exit 1
+					# Run specified test
+
+					# source https://unix.stackexchange.com/a/220196
+					if [ -d "$testName-"* ] 2>/dev/null; then
+						pushd "$testName-"* > /dev/null
+							testName="$(basename $(pwd))"
+						popd > /dev/null
+						runTest "${testName}"
+					else
+						set +e
+						ls "$testName-"* >/dev/null 2>&1
+						if [ $? -ne 0 ]; then
+							BO_exit_error "Cannot find test with prefix '$testName-' in '$(pwd)'"
+						fi
+						BO_exit_error "Found more than one test with prefix '$testName-' in '$(pwd)'"
 					fi
-					pushd "$testName-"* > /dev/null
-
-						runTest "$(echo "$mainpath" | sed 's/\/main$//')"
-
-					popd > /dev/null
 				fi
 			fi
 		popd > /dev/null
 }
 init "$@"
+
+
+#	local runLogPath
+#	if [ ! -z "${CIRCLE_ARTIFACTS}" ]; then
+#		runLogPath="${CIRCLE_ARTIFACTS}/tests.run.bash.log"
+#	else
+#		runLogPath="tests/.run.bash.log"
+#	fi
+	# TODO: Use NodeJS to split output to log and stdout so we can stream to remote socket
+	#       and preserve escape characters.
+#	BO_sourcePrototype "${__BO_DIR__}/run.sh" Run 2>&1 | tee "$runLogPath"
+
+	# TODO: Write test result to $CIRCLE_TEST_REPORTS/tests.run.result.xml
+	#<?xml version="1.0" encoding="UTF-8"?>
+	#<testsuite>
+	#  <!-- if your classname does not include a dot, the package defaults to "(root)" -->
+	#  <testcase name="my testcase" classname="my package.my classname" time="29">
+	#    <!-- If the test didn't pass, specify ONE of the following 3 cases -->
+	#    <!-- option 1 --> <skipped />
+	#    <!-- option 2 --> <failure message="my failure message">my stack trace</failure>
+	#    <!-- option 3 --> <error message="my error message">my crash report</error>
+	#    <system-out>my STDOUT dump</system-out>
+	#    <system-err>my STDERR dump</system-err>
+	#  </testcase>
+	#</testsuite>
+
+	# TODO: Get latest build artifacts and make available publickly
+	#curl https://circleci.com/api/v1.1/me?circle-token=
+	#curl https://circleci.com/api/v1.1/project/github/0ink/codeblock.js?circle-token=
+	#curl https://circleci.com/api/v1.1/project/github/0ink/codeblock.js/latest/artifacts?circle-token=

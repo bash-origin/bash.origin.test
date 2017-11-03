@@ -4,7 +4,7 @@ depend {
     "npm": {
         "@com.github/pinf-it/it.pinf.org.npmjs#s1": {
             "dependencies": {
-                "jest": "^20.0.4"
+                "mocha": "^3.5.3"
             }
         }
     }
@@ -17,34 +17,25 @@ function EXPORTS_run {
     workingDir="$(pwd)"
     testRelpath="$(BO_relative "$workingDir" "$testRootFile")"
 
-    [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~facebook~jest] testRelpath: $testRelpath"
-
-    echo ">>>TEST_IGNORE_LINE:^Time:\s+\d<<<"
-    echo ">>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<"
+    [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~mochajs~mocha] testRelpath: $testRelpath"
 
     export NODE_PATH="$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules:$NODE_PATH"
+
+    echo ">>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<"
 
     if [[ $BO_TEST_FLAG_INSPECT == 1 ]]; then
 
         echo "Running NodeJS with '--inspect-brk' which launches an interactive debugger ..."
 
-        config={
-            "rootDir": "$workingDir",
-            "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?|.+\\.js$"
-        }
-
-        # TODO: Inspect the process that actually runs the test!
         BO_VERSION_NVM_NODE=7
         BO_run_node --eval '
             const SPAWN = require("child_process").spawn;
             const EXEC = require("child_process").exec;
             const config = process.argv[1];
             const proc = SPAWN("'$(which node)'", [
+                "'$__DIRNAME__'/.rt/it.pinf.org.npmjs/node_modules/.bin/mocha",
                 "--inspect-brk",
-                "'$__DIRNAME__'/.rt/it.pinf.org.npmjs/node_modules/.bin/jest",
-                "'$testRelpath'",
-                "--config", config,
-                "--runInBand"
+                "'$testRelpath'"
             ]);
             proc.stdout.on("data", process.stdout.write);
             function launch (url) {
@@ -58,12 +49,8 @@ function EXPORTS_run {
                 }
                 process.stderr.write(data);
             });
-        ' "$config"
-
+        '
     else
-        "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/jest" "$testRelpath" --config={
-            "rootDir": "$workingDir",
-            "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?|.+\\.js$"
-        } --runInBand
+        "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/mocha" "$testRelpath"
     fi
 }

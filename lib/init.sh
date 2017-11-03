@@ -73,6 +73,23 @@ function EXPORTS_init {
             cp -f "$fromPath" ".gitignore"
         fi
 
+        function linkDependency {
+            # TODO: Resolve path to common libs dynamically
+            if [ ! -e "node_modules/$2" ]; then
+                if [ -e "../$1" ]; then
+                    if [ ! -e "node_modules" ]; then
+                        mkdir "node_modules"
+                    fi
+                    ln -s "../../$1" "node_modules/$2"
+                fi
+            fi
+        }
+
+        linkDependency "github.com~bash-origin~bash.origin" "bash.origin"
+        linkDependency "github.com~bash-origin~bash.origin.test" "bash.origin.test"
+
+        BO_run_npm install
+
     popd > /dev/null
 
     if BO_ensure_empty_path "${testSubpath}"; then

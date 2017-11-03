@@ -1,0 +1,10 @@
+BO_TEST_RUNNER_IMPL
+
+
+  Array
+    #indexOf()
+      ✓ should return -1 when the value is not present
+
+
+  1 passing (6ms)
+

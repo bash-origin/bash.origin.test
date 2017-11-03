@@ -4,7 +4,7 @@ depend {
     "npm": {
         "@com.github/pinf-it/it.pinf.org.npmjs#s1": {
             "dependencies": {
-                "nightwatch": "^0.9.15"
+                "nightwatch": "^0.9.16"
             }
         }
     }
@@ -181,13 +181,46 @@ function EXPORTS_run {
 
         export NODE_PATH="$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules:$NODE_PATH"
 
-        "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/nightwatch" \
-            --config "${configPath}" \
-            --test "$testRelpath" \
-            --env "$1"
+        if [[ $BO_TEST_FLAG_INSPECT == 1 ]]; then
+
+            echo "Running NodeJS with '--inspect-brk' which launches an interactive debugger ..."
+
+            BO_VERSION_NVM_NODE=7
+            # TODO: Relocate this into a helper.
+            BO_run_node --eval '
+                const SPAWN = require("child_process").spawn;
+                const EXEC = require("child_process").exec;
+                const config = process.argv[1];
+                const proc = SPAWN("'$(which node)'", [
+                    "--inspect-brk",
+                    "'$__DIRNAME__'/.rt/it.pinf.org.npmjs/node_modules/.bin/nightwatch",
+                    "--config", "'$configPath'",
+                    "--test", "'$testRelpath'",
+                    "--env", "'$1'"
+                ]);
+                proc.stdout.on("data", process.stdout.write);
+                function launch (url) {
+                    EXEC("\"'$__DIRNAME__'/../open-in-google-chrome.sh\" \"" + url + "\"", function () {});
+                }
+                proc.stderr.on("data", function (data) {
+                    data = data.toString();
+                    if (launch && /chrome-devtools:\/\/devtools\//.test(data)) {
+                        launch(data.match(/(chrome-devtools:\/\/devtools\/.+$)/m)[1]);
+                        launch = null;
+                    }
+                    process.stderr.write(data);
+                });
+            '
+        else
+            "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/nightwatch" \
+                --config "${configPath}" \
+                --test "$testRelpath" \
+                --env "$1"
+        fi
     }
 
     echo ">>>TEST_IGNORE_LINE:\d milliseconds.\$<<<"
+    echo ">>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<"
 
     echo "environments: ${environments}"
 

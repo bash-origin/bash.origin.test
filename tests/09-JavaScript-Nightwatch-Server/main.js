@@ -47,6 +47,8 @@ describe('Hello World', function() {
             .url('http://localhost:' + process.env.PORT + '/')
             .pause(500);
 
+        client.waitForElementPresent('body', 3000);
+
         client.expect.element('body').text.to.contain('Hello World!');
     });
 });
