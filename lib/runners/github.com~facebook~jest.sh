@@ -4,7 +4,7 @@ depend {
     "npm": {
         "@com.github/pinf-it/it.pinf.org.npmjs#s1": {
             "dependencies": {
-                "jest": "^20.0.4"
+                "jest": "^21.2.1"
             }
         }
     }
@@ -39,7 +39,7 @@ function EXPORTS_run {
         }
 
         # TODO: Inspect the process that actually runs the test!
-        BO_VERSION_NVM_NODE=7
+        #BO_VERSION_NVM_NODE=7
         BO_run_node --eval '
             const SPAWN = require("child_process").spawn;
             const EXEC = require("child_process").exec;

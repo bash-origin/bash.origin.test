@@ -1,4 +1,4 @@
-BO_TEST_RUNNER_IMPL
+>>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<
 
 
   Array
@@ -6,5 +6,4 @@ BO_TEST_RUNNER_IMPL
       ✓ should return -1 when the value is not present
 
 
-  1 passing (6ms)
 

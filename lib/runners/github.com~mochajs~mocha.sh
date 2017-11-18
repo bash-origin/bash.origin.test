@@ -4,7 +4,7 @@ depend {
     "npm": {
         "@com.github/pinf-it/it.pinf.org.npmjs#s1": {
             "dependencies": {
-                "mocha": "^3.5.3"
+                "mocha": "^4.0.1"
             }
         }
     }

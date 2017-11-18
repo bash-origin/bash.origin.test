@@ -9,7 +9,7 @@
         "bash.origin.test": "tests/run.sh"
     },
     "dependencies": {
-        "bash.origin.workspace": "^0.2.6",
+        "bash.origin.workspace": "^0.2.16",
         "cli-table2": "^0.2.0",
         "minimist": "^1.2.0"
     },

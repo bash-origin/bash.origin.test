@@ -1,0 +1,28 @@
+---
+>>>TEST_IGNORE_LINE:^Time:\s+\d<<<
+>>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<
+
+ RUNS  ...main.js
+[K[1A[K[1A PASS  08-JavaScript-via-sh/main.js
+
+ RUNS  ...main.js
+
+ RUNS  ...main.js
+[K[1A[K[1A
+
+ RUNS  ...main.js
+[K[1A[K[1ATest Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Ran all test suites matching "08-JavaScript-via-sh/main.js".
+  console.log 08-JavaScript-via-sh/main.js:3
+    Load code
+
+  console.log 08-JavaScript-via-sh/main.js:7
+    Test code
+
+---
+Load code
+Runtime code
+---
+OK
