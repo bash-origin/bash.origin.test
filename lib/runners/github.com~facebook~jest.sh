@@ -19,8 +19,13 @@ function EXPORTS_run {
 
     [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~facebook~jest] testRelpath: $testRelpath"
 
-    echo ">>>TEST_IGNORE_LINE:^Time:\s+\d<<<"
-    echo ">>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<"
+    #echo ">>>TEST_IGNORE_LINE:^Time:\s+\d<<<"
+    #echo ">>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<"
+
+    echo ">>>TEST_IGNORE_LINE:\"startTime\": \d+<<<"
+    echo ">>>TEST_IGNORE_LINE:\"duration\": \d+<<<"
+    echo ">>>TEST_IGNORE_LINE:\"start\": \d+<<<"
+    echo ">>>TEST_IGNORE_LINE:\"end\": \d+<<<"
 
     export NODE_PATH="$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules:$NODE_PATH"
 
@@ -63,7 +68,10 @@ function EXPORTS_run {
     else
         "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/jest" "$testRelpath" --config={
             "rootDir": "$workingDir",
-            "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?|.+\\.js$"
+            "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?|.+\\.js$",
+            "reporters": [
+                "$__DIRNAME__/jest-reporter.js"
+            ]
         } --runInBand
     fi
 }
