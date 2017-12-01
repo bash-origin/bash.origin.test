@@ -222,7 +222,7 @@ function init {
 						fi
 
 						if [[ ! -x "$testRootFile" ]]; then
-		        			if [[ $BO_TEST_FLAG_RECORD != 1 ]]; then
+		        			if [[ $BO_TEST_FLAG_RECORD != 1 ]] && [[ $BO_TEST_FLAG_DEV != 1 ]]; then
 								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test entry point '$testRootFile' not executable! Run with '--record' to fix. (pwd: $(pwd))" RED BOLD)"
 								exit 1
 							else
@@ -291,9 +291,7 @@ function init {
 								FS.writeFileSync("'$actualResultPath'", lines.join("\n"), "utf8");
 							'
 
-
 							# Make paths in result relative
-
 							ownPath=`echo "$(pwd)" | sed 's/\\//\\\\\\//g'`
 							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $ownPath"
 							sed -i -e "s/$ownPath/TeStLoCaLiZeD/g" "$actualResultPath"
@@ -313,6 +311,10 @@ function init {
 							homePath=`echo "$HOME" | sed 's/\\//\\\\\\//g'`
 							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $homePath"
 							sed -i -e "s/$homePath/TeStLoCaLiZeD/g" "$actualResultPath"
+
+							pkgPath=`echo "$BO_TEST_HOST_PACKAGE_BASE_DIR" | sed 's/\\//\\\\\\//g'`
+							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $pkgPath"
+							sed -i -e "s/$pkgPath/TeStLoCaLiZeD/g" "$actualResultPath"
 
 							if [ -e "$actualResultPath-e" ]; then
 								rm "$actualResultPath-e"
@@ -379,10 +381,15 @@ function init {
 										echo "$(BO_cecho "| # $(ls -al "$actualResultPath")" RED BOLD)"
 										echo "$(BO_cecho "| # $(ls -al "$rawResultPath")" RED BOLD)"
 
-										# TODO: If no terminal attached we should exit
-										echo "$(BO_cecho "|" RED BOLD)"
-										read -p "$(BO_cecho "| Press any key to show ACTUAL & EXPECTED results as well as DIFF?" RED BOLD)" -n 1 -r
-										echo "$(BO_cecho "|" RED BOLD)"
+										# TODO: If no terminal attached we should exit?
+										# If we are not on CircleCI we ask user if diffs should be shown.
+										# TODO: Detect more CI environments.
+										if [ -z "$CIRCLE_BRANCH" ]; then
+											# Not on CI server so we ask user.
+											echo "$(BO_cecho "|" RED BOLD)"
+											read -p "$(BO_cecho "| Press any key to show ACTUAL & EXPECTED results as well as DIFF?" RED BOLD)" -n 1 -r
+											echo "$(BO_cecho "|" RED BOLD)"
+										fi
 
 										#echo "$(BO_cecho "| ########## ACTUAL : $rawResultPath >>>" RED BOLD)"
 										#cat "$rawResultPath"
@@ -392,6 +399,7 @@ function init {
 										cat "$expectedResultPath"
 										echo "$(BO_cecho "| ########## DIFF >>>" RED BOLD)"
 										set +e
+										# TODO: Show coloured diff.
 										diff -u "$expectedResultPath" "$actualResultPath"
 										set -e
 										echo "$(BO_cecho "| ##################################################" RED BOLD)"
@@ -419,6 +427,9 @@ function init {
 
         BO_format "${VERBOSE}" "FOOTER"
     }
+
+
+		BO_TEST_HOST_PACKAGE_BASE_DIR="$(pwd)"
 
 
 		BO_parse_args "ARGS" "$@"

@@ -14,6 +14,6 @@
         "minimist": "^1.2.0"
     },
     "scripts": {
-        "test": "BO_ROOT_SCRIPT_PATH=$(pwd)/node_modules/bash.origin/bash.origin tests/run.sh tests"
+        "test": "bash.origin tests/run.sh tests"
     }
 }

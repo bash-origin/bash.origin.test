@@ -3,6 +3,5 @@
 environments: default
 
 Server running at http://localhost:8080
-    Hello World Test:   ✓ Hello World Test: 3102ms
 
 

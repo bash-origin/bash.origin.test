@@ -177,7 +177,8 @@ function EXPORTS_run {
 #            ln -s "../../../../../../github.com~bash-origin~bash.origin.express" "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/bash.origin.express"
 #        fi
 
-        echo ">>>TEST_IGNORE_LINE:Test (.+)<<<"
+        echo ">>>TEST_IGNORE_LINE:Test .+<<<"
+        echo ">>>TEST_IGNORE_LINE:Test: .+ms<<<"
 
         export NODE_PATH="$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules:$NODE_PATH"
 

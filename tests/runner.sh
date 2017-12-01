@@ -7,8 +7,9 @@ cmd="$1"
 shift
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] BO_LOADED: $BO_LOADED"
 
-# TODO: Remove once 'bash.origin' is on bin path automatically
-BO_ensure_nvm
+if ! BO_has "node"; then
+    BO_ensure_nvm
+fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Header for file $cmd: $(head -1 "$cmd")"
 
