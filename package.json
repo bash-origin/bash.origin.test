@@ -14,6 +14,7 @@
         "minimist": "^1.2.0"
     },
     "scripts": {
-        "test": "bash.origin tests/run.sh tests"
+        "test": "bash.origin tests/run.sh tests",
+        "publish-website": "bash.origin.script ./workspace.sh publish"
     }
 }
