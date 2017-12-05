@@ -41,14 +41,24 @@ set +e
 if [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
     time {
         set -x
-        BO_IS_TEST_RUN=1 BO_LOADED= BO_IS_SOURCING= BO_sourceProfile__sourced= __ON_INIT__BO_IS_SOURCING= "$binName" "$cmd" "$@"
+        BO_IS_TEST_RUN=1 \
+            BO_LOADED= \
+            BO_IS_SOURCING= \
+            BO_sourceProfile__sourced= \
+            __ON_INIT__BO_IS_SOURCING= \
+            "$binName" "$cmd" "$@"
         set +x
         rc=$?
         echo "##### END_TEST_RESULT #####"
     }
     BO_run_recent_node "$BO_TEST_PACKAGE_PATH/lib/profile.js" --log "$BO_TEST_RAW_RESULT_PATH" summary
 else
-    BO_IS_TEST_RUN=1 BO_LOADED= BO_IS_SOURCING= BO_sourceProfile__sourced= __ON_INIT__BO_IS_SOURCING= "$binName" "$cmd" "$@"
+    BO_IS_TEST_RUN=1 \
+        BO_LOADED= \
+        BO_IS_SOURCING= \
+        BO_sourceProfile__sourced= \
+        __ON_INIT__BO_IS_SOURCING= \
+        "$binName" "$cmd" "$@"
     rc=$?
 fi
 set -e

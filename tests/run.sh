@@ -130,6 +130,10 @@ function init {
 		local __BO_DIR__="$___TMP___"
 
 
+		export BO_ALLOW_DOWNLOADS=1
+		export BO_ALLOW_INSTALLS=1
+
+
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] init()"
 
 

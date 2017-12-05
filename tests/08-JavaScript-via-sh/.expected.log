@@ -1,26 +1,105 @@
 ---
->>>TEST_IGNORE_LINE:^Time:\s+\d<<<
->>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<
-
- RUNS  ...main.js
-[K[1A[K[1A PASS  08-JavaScript-via-sh/main.js
-
- RUNS  ...main.js
-
- RUNS  ...main.js
-[K[1A[K[1A
-
- RUNS  ...main.js
-[K[1A[K[1ATest Suites: 1 passed, 1 total
-Tests:       1 passed, 1 total
-Snapshots:   0 total
-Ran all test suites matching "08-JavaScript-via-sh/main.js".
+>>>TEST_IGNORE_LINE:"startTime": \d+<<<
+>>>TEST_IGNORE_LINE:"duration": \d+<<<
+>>>TEST_IGNORE_LINE:"start": \d+<<<
+>>>TEST_IGNORE_LINE:"end": \d+<<<
+[jest] START RUN
+[jest] START SUITE: TeStLoCaLiZeD/main.js
   console.log 08-JavaScript-via-sh/main.js:3
     Load code
 
   console.log 08-JavaScript-via-sh/main.js:7
     Test code
 
+[jest] RESULT: {
+    "console": null,
+    "failureMessage": null,
+    "numFailingTests": 0,
+    "numPassingTests": 1,
+    "numPendingTests": 0,
+    "perfStats": {
+    },
+    "snapshot": {
+        "added": 0,
+        "fileDeleted": false,
+        "matched": 0,
+        "unchecked": 0,
+        "unmatched": 0,
+        "updated": 0
+    },
+    "testFilePath": "TeStLoCaLiZeD/main.js",
+    "testResults": [
+        {
+            "ancestorTitles": [],
+            "failureMessages": [],
+            "fullName": "Test",
+            "numPassingAsserts": 0,
+            "status": "passed",
+            "title": "Test"
+        }
+    ],
+    "sourceMaps": {},
+    "skipped": false
+}
+[jest] RUN COMPLETE: {
+    "numFailedTestSuites": 0,
+    "numFailedTests": 0,
+    "numPassedTestSuites": 1,
+    "numPassedTests": 1,
+    "numPendingTestSuites": 0,
+    "numPendingTests": 0,
+    "numRuntimeErrorTestSuites": 0,
+    "numTotalTestSuites": 1,
+    "numTotalTests": 1,
+    "snapshot": {
+        "added": 0,
+        "didUpdate": false,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "unmatched": 0,
+        "updated": 0
+    },
+    "success": false,
+    "testResults": [
+        {
+            "console": null,
+            "failureMessage": null,
+            "numFailingTests": 0,
+            "numPassingTests": 1,
+            "numPendingTests": 0,
+            "perfStats": {
+            },
+            "snapshot": {
+                "added": 0,
+                "fileDeleted": false,
+                "matched": 0,
+                "unchecked": 0,
+                "unmatched": 0,
+                "updated": 0
+            },
+            "testFilePath": "TeStLoCaLiZeD/main.js",
+            "testResults": [
+                {
+                    "ancestorTitles": [],
+                    "failureMessages": [],
+                    "fullName": "Test",
+                    "numPassingAsserts": 0,
+                    "status": "passed",
+                    "title": "Test"
+                }
+            ],
+            "sourceMaps": {},
+            "skipped": false
+        }
+    ],
+    "wasInterrupted": false
+}
 ---
 Load code
 Runtime code
