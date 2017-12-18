@@ -13,8 +13,11 @@ depend {
 function EXPORTS_run {
 
     testRootFile="$1"
-
     workingDir="$(pwd)"
+
+    [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~mochajs~mocha] testRootFile: $testRootFile"
+    [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~mochajs~mocha] workingDir: $workingDir"
+
     testRelpath="$(BO_relative "$workingDir" "$testRootFile")"
 
     [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~mochajs~mocha] testRelpath: $testRelpath"

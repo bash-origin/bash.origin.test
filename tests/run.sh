@@ -463,12 +463,19 @@ function init {
 
 					BO_requireModule "$testRunnerPath" as "BO_TEST_RUNNER_IMPL"
 
+					[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_BASE_DIR: $BO_TEST_BASE_DIR"
+
 					if [ ! -z "$BO_TEST_BASE_DIR" ]; then
 						testBaseDir="$BO_TEST_BASE_DIR"
 						testPath="$1"
 					else
 						testBaseDir="$(dirname $1)"
 						testPath="$1"
+						if [ "${testPath:0:1}" != "/" ]; then
+							testPath="$(pwd)/${testPath}"
+						else
+							testPath="../$1"
+						fi
 					fi
 				else
 					echo "$(BO_cecho "[bash.origin.test] Test file $1 does not have a '#!/usr/bin/env bash.origin.test via ...' header!" RED BOLD)"
@@ -485,9 +492,10 @@ function init {
 			BO_requireModule "$__BO_DIR__/../lib/runners/bash.origin.sh" as "BO_TEST_RUNNER_IMPL"
 		fi
 
-		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_RUNNER_IMPL: $BO_TEST_RUNNER_IMPL"
+		#[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_RUNNER_IMPL: $BO_TEST_RUNNER_IMPL"
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testBaseDir: $testBaseDir"
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testName: $testName"
+		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testPath: $testPath"
 
 
 		if [ ! -d "$testBaseDir" ]; then
@@ -542,10 +550,12 @@ function init {
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
 
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] pwd: $(pwd)"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testPath: $testPath"
 
 			if [ -e "$testPath" ]; then
 
-				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testPath: $testPath"
+				[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] run BO_TEST_RUNNER_IMPL for testPath: $testPath"
 
 				BO_TEST_RUNNER_IMPL run "$testPath"
 
