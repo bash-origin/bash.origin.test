@@ -6,7 +6,6 @@
 [ -z "$BO_TRACE" ] || echo -e "[bash.origin.test][run.sh] printenv:\n$(printenv)"
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] pwd: $(pwd)"
 
-
 function ensureBash4 {
 		BO_READ_SELF_BASH_SOURCE="$""{BASH_SOURCE[0]:-$""0}"
 		eval BO_SELF_BASH_SOURCE="$BO_READ_SELF_BASH_SOURCE"
@@ -424,7 +423,6 @@ function init {
 								cp -f "$actualResultPath" "$expectedResultPath"
 
 								echo "$(BO_cecho "[bash.origin.test] Test result recorded for $testName. Commit changes to git!" YELLOW BOLD)"
-								exit 0
 				        	fi
 						fi
 				popd > /dev/null
@@ -546,9 +544,46 @@ function init {
 				export BO_SYSTEM_CACHE_DIR="$BO_PACKAGES_DIR"
 			fi
 
+			# Link declared bin scripts and add to PATH
+			testPackageBinPath=$(node --eval '
+				const PATH = require("path");
+				const FS = require("fs");
+
+				// TODO: Use helper for this
+				function findDescriptor (dir) {
+					var path = PATH.join(dir, "package.json");
+					if (FS.existsSync(path)) return path;
+					path = PATH.dirname(dir);
+					if (path === dir) return null;
+					return findDescriptor(path);
+				}
+				var path = findDescriptor(process.cwd());
+				if (path) {
+					var descriptor = require(path);
+					if (descriptor.bin) {
+						process.stdout.write(PATH.join(path, "..", ".~bin"));
+						if (!FS.existsSync(PATH.join(path, "..", ".~bin"))) {
+							FS.mkdirSync(PATH.join(path, "..", ".~bin"));
+						}
+						Object.keys(descriptor.bin).forEach(function (name) {
+							var sourcePath = PATH.join(path, "..", descriptor.bin[name]);
+							var targetPath = PATH.join(path, "..", ".~bin", name);
+							if (FS.existsSync(targetPath)) {
+								FS.unlinkSync(targetPath);
+							}
+							FS.symlinkSync(sourcePath, targetPath);
+						});
+					}
+				}
+			')
+			if [ "${testPackageBinPath}" != "" ]; then
+				export PATH="${testPackageBinPath}:${PATH}"
+			fi
+
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_PACKAGES_DIR: $BO_PACKAGES_DIR"
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_SYSTEM_CACHE_DIR: $BO_SYSTEM_CACHE_DIR"
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_BASH: $BO_BASH"
+			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] PATH: $PATH"
 
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] pwd: $(pwd)"
 			[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] testPath: $testPath"
