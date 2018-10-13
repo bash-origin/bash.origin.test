@@ -2,3 +2,5 @@
 *~.compiled.*
 .rt/
 /.installed*
+.~*
+/package-lock.json

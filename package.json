@@ -1,20 +1,25 @@
 {
-    "name": "bash.origin.test",
-    "version": "0.1.39",
-    "pm": {
-        "publish": "npm"
-    },
-    "repository": "https://github.com/bash-origin/bash.origin.test.git",
-    "bin": {
-        "bash.origin.test": "tests/run.sh"
-    },
-    "dependencies": {
-        "bash.origin.workspace": "^0.2.64",
-        "cli-table3": "^0.5.0",
-        "minimist": "^1.2.0"
-    },
-    "scripts": {
-        "test": "bash.origin tests/run.sh tests",
-        "publish-website": "bash.origin.script ./workspace.sh publish"
+  "name": "bash.origin.test",
+  "version": "0.1.39",
+  "pm": {
+    "publish": "npm"
+  },
+  "repository": "https://github.com/bash-origin/bash.origin.test.git",
+  "bin": {
+    "bash.origin.test": "tests/run.sh"
+  },
+  "dependencies": {
+    "bash.origin.lib": "^0.1.6",
+    "cli-table3": "^0.5.0"
+  },
+  "scripts": {
+    "test": "bash.origin tests/run.sh tests",
+    "publish-website": "bash.origin.script ./workspace.sh publish"
+  },
+  "config": {
+    "bash.origin.lib": {
+      "pack": "full",
+      "stream": "0.1"
     }
+  }
 }

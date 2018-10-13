@@ -1,15 +1,5 @@
 #!/usr/bin/env bash.origin.script
 
-depend {
-    "npm": {
-        "@com.github/pinf-it/it.pinf.org.npmjs#s1": {
-            "dependencies": {
-                "jest": "^21.2.1"
-            }
-        }
-    }
-}
-
 function EXPORTS_run {
 
     testRootFile="$1"
@@ -27,8 +17,6 @@ function EXPORTS_run {
     echo ">>>TEST_IGNORE_LINE:\"start\": \d+<<<"
     echo ">>>TEST_IGNORE_LINE:\"end\": \d+<<<"
 
-    export NODE_PATH="$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules:$NODE_PATH"
-
     if [[ $BO_TEST_FLAG_INSPECT == 1 ]]; then
 
         echo "Running NodeJS with '--inspect-brk' which launches an interactive debugger ..."
@@ -41,12 +29,14 @@ function EXPORTS_run {
         # TODO: Inspect the process that actually runs the test!
         #BO_VERSION_NVM_NODE=7
         BO_run_node --eval '
+            const BO_LIB = require("bash.origin.lib").forPackage(__dirname);
             const SPAWN = require("child_process").spawn;
             const EXEC = require("child_process").exec;
+            const URL = require("url");
             const config = process.argv[1];
             const proc = SPAWN("'$(which node)'", [
                 "--inspect-brk",
-                "'$__DIRNAME__'/.rt/it.pinf.org.npmjs/node_modules/.bin/jest",
+                BO_LIB.binPath + "/jest",
                 "'$testRelpath'",
                 "--config", config,
                 "--runInBand"
@@ -57,16 +47,24 @@ function EXPORTS_run {
             }
             proc.stderr.on("data", function (data) {
                 data = data.toString();
-                if (launch && /chrome-devtools:\/\/devtools\//.test(data)) {
-                    launch(data.match(/(chrome-devtools:\/\/devtools\/.+$)/m)[1]);
-                    launch = null;
+                if (launch && /Debugger listening on ws:\/\//.test(data)) {
+
+                    const wsUrl = data.match(/Debugger listening on (ws:\/\/.+)/m)[1]
+                    const wsUrl_parsed = URL.parse(wsUrl);
+
+                    BO_LIB.LIB.REQUEST("http://" + wsUrl_parsed.host + "/json/list", function (err, response, body) {
+                        const meta = JSON.parse(body)[0];
+                        launch(meta.devtoolsFrontendUrl);
+                        launch = null;
+                    });
                 }
                 process.stderr.write(data);
             });
         ' "$config"
 
     else
-        "$__DIRNAME__/.rt/it.pinf.org.npmjs/node_modules/.bin/jest" "$testRelpath" --config={
+
+        "$(bash.origin.lib binPath)/jest" "$testRelpath" --config={
             "rootDir": "$workingDir",
             "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?|.+\\.js$",
             "reporters": [

@@ -326,6 +326,9 @@ function init {
 
 						invokeTest
 
+						[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_DEV: $BO_TEST_FLAG_DEV"
+						[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] BO_TEST_FLAG_PROFILE: $BO_TEST_FLAG_PROFILE"
+
 						if [[ $BO_TEST_FLAG_DEV == 1 ]]; then
 							echo "$(BO_cecho "[bash.origin.test] Skip test evaluation. Running in dev mode." YELLOW BOLD)"
 						elif [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
@@ -333,6 +336,9 @@ function init {
 						else
 
 							if [ ! -s "$actualResultPath" ]; then
+
+								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] pwd: $(pwd)"
+								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] actualResultPatht: $actualResultPath"
 
 								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty!" RED BOLD)"
 
@@ -476,6 +482,8 @@ function init {
 						fi
 					fi
 				else
+#					testBaseDir="$(pwd)"
+#					testPath="$1"
 					echo "$(BO_cecho "[bash.origin.test] Test file $1 does not have a '#!/usr/bin/env bash.origin.test via ...' header!" RED BOLD)"
 					exit 1
 				fi
