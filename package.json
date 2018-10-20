@@ -9,7 +9,7 @@
     "bash.origin.test": "tests/run.sh"
   },
   "dependencies": {
-    "bash.origin.lib": "^0.1.6",
+    "bash.origin.lib": "^0.2.15",
     "cli-table3": "^0.5.0"
   },
   "scripts": {
