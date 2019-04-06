@@ -64,7 +64,7 @@ function ensureBash4 {
 			SHELL="$BO_BASH" "$BO_BASH" "$__BO_DIR__/run.sh" "$@"
 			exit 0
 		fi
-		if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]]; then
+		if [[ "$($SHELL --version)" != "GNU bash, version 4."* ]] && [[ "$($SHELL --version)" != "GNU bash, version 5."* ]]; then
 		    if [ "$_BO_TEST_LAUNCHED_BASH_4" == "1" ]; then
 				installBashOrExit "$@"
 			fi
@@ -576,9 +576,11 @@ function init {
 						Object.keys(descriptor.bin).forEach(function (name) {
 							var sourcePath = PATH.join(path, "..", descriptor.bin[name]);
 							var targetPath = PATH.join(path, "..", ".~bin", name);
-							if (FS.existsSync(targetPath)) {
+							try {
+							//if (FS.existsSync(targetPath)) {
 								FS.unlinkSync(targetPath);
-							}
+							//}
+							} catch (err) {}
 							FS.symlinkSync(sourcePath, targetPath);
 						});
 					}

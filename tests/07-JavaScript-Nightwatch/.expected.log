@@ -1,15 +1,14 @@
+>>>TEST_IGNORE_LINE:assertions passed\.<<<
 >>>TEST_IGNORE_LINE:\d milliseconds.$<<<
 >>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<
 environments: default,chrome
 
-[0;35m=====================[0m
-
+[0;35m=================[0m
 Running:  [0;32mDemo test Google[0m
-[0;32mNo assertions ran.[0m
 
 
-[0;35m=====================[0m
 
+[0;35m=================[0m
 Running:  [0;32mDemo test Google[0m
-[0;32mNo assertions ran.[0m
+
 

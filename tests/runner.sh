@@ -13,13 +13,20 @@ fi
 
 [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runner.sh] Header for file $cmd: $(head -1 "$cmd")"
 
+binName=""
 if [[ "$(head -1 "$cmd")" == "#!/usr/bin/env bash.origin.script"* ]] ; then
     binName="$(which bash.origin.script)"
+    binName=""
 else
     if [[ "$(head -1 "$cmd")" == "#!/usr/bin/env bash.origin.test"* ]] ; then
         binName="$BO_TEST_PACKAGE_PATH/tests/run.sh"
     else
-        binName="$(which bash.origin)"
+        if [[ "$(head -1 "$cmd")" == "#!/usr/bin/env bash.origin"* ]] ; then
+            binName="$(which bash.origin)"
+            binName=""
+        else
+            binName=""
+        fi
     fi
 fi
 
@@ -41,24 +48,42 @@ set +e
 if [[ $BO_TEST_FLAG_PROFILE == 1 ]]; then
     time {
         set -x
-        BO_IS_TEST_RUN=1 \
-            BO_LOADED= \
-            BO_IS_SOURCING= \
-            BO_sourceProfile__sourced= \
-            __ON_INIT__BO_IS_SOURCING= \
-            "$binName" "$cmd" "$@"
+        if [ "$binName" == "" ]; then
+            BO_IS_TEST_RUN=1 \
+                BO_LOADED= \
+                BO_IS_SOURCING= \
+                BO_sourceProfile__sourced= \
+                __ON_INIT__BO_IS_SOURCING= \
+                "$cmd" "$@"
+        else
+            BO_IS_TEST_RUN=1 \
+                BO_LOADED= \
+                BO_IS_SOURCING= \
+                BO_sourceProfile__sourced= \
+                __ON_INIT__BO_IS_SOURCING= \
+                "$binName" "$cmd" "$@"
+        fi
         set +x
         rc=$?
         echo "##### END_TEST_RESULT #####"
     }
     BO_run_recent_node "$BO_TEST_PACKAGE_PATH/lib/profile.js" --log "$BO_TEST_RAW_RESULT_PATH" summary
 else
-    BO_IS_TEST_RUN=1 \
-        BO_LOADED= \
-        BO_IS_SOURCING= \
-        BO_sourceProfile__sourced= \
-        __ON_INIT__BO_IS_SOURCING= \
-        "$binName" "$cmd" "$@"
+    if [ "$binName" == "" ]; then
+        BO_IS_TEST_RUN=1 \
+            BO_LOADED= \
+            BO_IS_SOURCING= \
+            BO_sourceProfile__sourced= \
+            __ON_INIT__BO_IS_SOURCING= \
+            "$cmd" "$@"
+    else
+        BO_IS_TEST_RUN=1 \
+            BO_LOADED= \
+            BO_IS_SOURCING= \
+            BO_sourceProfile__sourced= \
+            __ON_INIT__BO_IS_SOURCING= \
+            "$binName" "$cmd" "$@"
+    fi
     rc=$?
 fi
 set -e

@@ -8,18 +8,15 @@
     "bin": {
         "bash.origin.test": "tests/run.sh"
     },
+    "__dependencies": {
+        "bash.origin.lib": "^0.2.15"
+    },
     "dependencies": {
-        "bash.origin.lib": "^0.2.15",
         "cli-table3": "^0.5.0"
     },
     "scripts": {
+        "install": "lib.json from node_modules > .~lib.json",
         "test": "bash.origin tests/run.sh tests",
         "publish-website": "bash.origin.script ./workspace.sh publish"
-    },
-    "config": {
-        "bash.origin.lib": {
-            "pack": "full",
-            "stream": "0.1"
-        }
     }
 }

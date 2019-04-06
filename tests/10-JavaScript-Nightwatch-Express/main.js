@@ -12,9 +12,9 @@ console.log(">>>TEST_IGNORE_LINE:^127\\.<<<");
 
 describe('Hello World', function() {
 
-    const LIB = require("bash.origin.lib").forPackage(__dirname + '/../..').LIB;
+    const LIB = require("bash.origin.lib").forPackage(__dirname);
     
-    LIB.BASH_ORIGIN_EXPRESS.runForTestHooks(before, after, {
+    LIB.js.BASH_ORIGIN_EXPRESS.runForTestHooks(before, after, {
         "routes": {
             "/": "<body>Hello World!</body>"
         }

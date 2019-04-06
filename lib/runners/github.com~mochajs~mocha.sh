@@ -12,6 +12,12 @@ function EXPORTS_run {
 
     [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~mochajs~mocha] testRelpath: $testRelpath"
 
+    echo "TEST_MATCH_IGNORE>>>"
+    if ! which mocha; then
+        npm install -g mocha
+    fi
+    echo "<<<TEST_MATCH_IGNORE"
+
     echo ">>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<"
 
     if [[ $BO_TEST_FLAG_INSPECT == 1 ]]; then
@@ -26,7 +32,7 @@ function EXPORTS_run {
             const URL = require("url");
             const config = process.argv[1];
             const proc = SPAWN("'$(which node)'", [
-                BO_LIB.binPath + "/mocha",
+                "mocha",
                 "--inspect-brk",
                 "'$testRelpath'"
             ]);
@@ -41,7 +47,7 @@ function EXPORTS_run {
                     const wsUrl = data.match(/Debugger listening on (ws:\/\/.+)/m)[1]
                     const wsUrl_parsed = URL.parse(wsUrl);
 
-                    BO_LIB.LIB.REQUEST("http://" + wsUrl_parsed.host + "/json/list", function (err, response, body) {
+                    BO_LIB.REQUEST("http://" + wsUrl_parsed.host + "/json/list", function (err, response, body) {
                         const meta = JSON.parse(body)[0];
                         launch(meta.devtoolsFrontendUrl);
                         launch = null;
@@ -51,6 +57,6 @@ function EXPORTS_run {
             });
         '
     else
-        "$(bash.origin.lib binPath)/mocha" "$testRelpath"
+        "mocha" "$testRelpath"
     fi
 }

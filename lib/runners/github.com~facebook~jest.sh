@@ -9,6 +9,12 @@ function EXPORTS_run {
 
     [ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][runners/github.com~facebook~jest] testRelpath: $testRelpath"
 
+    echo "TEST_MATCH_IGNORE>>>"
+    if ! which jest; then
+        npm install -g jest
+    fi
+    echo "<<<TEST_MATCH_IGNORE"
+
     #echo ">>>TEST_IGNORE_LINE:^Time:\s+\d<<<"
     #echo ">>>TEST_IGNORE_LINE:Test \([\d]+ms\)<<<"
 
@@ -36,7 +42,7 @@ function EXPORTS_run {
             const config = process.argv[1];
             const proc = SPAWN("'$(which node)'", [
                 "--inspect-brk",
-                BO_LIB.binPath + "/jest",
+                "jest",
                 "'$testRelpath'",
                 "--config", config,
                 "--runInBand"
@@ -64,7 +70,7 @@ function EXPORTS_run {
 
     else
 
-        "$(bash.origin.lib binPath)/jest" "$testRelpath" --config={
+        "jest" "$testRelpath" --config={
             "rootDir": "$workingDir",
             "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.jsx?|.+\\.js$",
             "reporters": [

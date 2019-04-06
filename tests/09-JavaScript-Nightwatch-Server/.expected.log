@@ -1,3 +1,4 @@
+>>>TEST_IGNORE_LINE:assertions passed\.<<<
 >>>TEST_IGNORE_LINE:\d milliseconds.$<<<
 >>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<
 environments: default

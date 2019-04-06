@@ -8,14 +8,23 @@ if ! BO_has geckodriver; then
 fi
 if ! BO_has chromedriver; then
     echo "Installing chromedriver ..."
-    brew install chromedriver
+    brew cask install chromedriver
+fi
+if [[ "$(java --version)" != "openjdk"* ]]; then
+    echo "Installing java ..."
+    brew cask install java
 fi
 if ! BO_has selenium-server; then
     echo "Installing selenium-server-standalone ..."
     brew install selenium-server-standalone
 fi
+if ! which nightwatch; then
+    npm install -g nightwatch
+fi
 echo "<<<TEST_MATCH_IGNORE"
 
+
+echo ">>>TEST_IGNORE_LINE:assertions passed\.<<<"
 
 
 function PRIVATE_ensureSeleniumServerRunning {
@@ -186,7 +195,7 @@ function EXPORTS_run {
                     const config = process.argv[1];
                     const proc = SPAWN("'$(which node)'", [
                         "--inspect-brk",
-                        BO_LIB.binPath + "/nightwatch",
+                        "nightwatch",
                         "--config", "'$configPath'",
                         "--test", "'$(basename "$testRelpath")'",
                         "--env", "'$1'"
@@ -212,7 +221,7 @@ function EXPORTS_run {
                     });
                 '
             else
-                "$(bash.origin.lib binPath)/nightwatch" \
+                "nightwatch" \
                     --config "${configPath}" \
                     --test "$(basename "$testRelpath")" \
                     --env "$1"
