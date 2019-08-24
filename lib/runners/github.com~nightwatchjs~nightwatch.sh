@@ -2,10 +2,13 @@
 
 # TODO: Relocate into plugin.
 echo "TEST_MATCH_IGNORE>>>"
+
+# TODO: Ensure exiting version is recent
 if ! BO_has geckodriver; then
     echo "Installing geckodriver ..."
     brew install geckodriver
 fi
+# TODO: Ensure exiting version is recent
 if ! BO_has chromedriver; then
     echo "Installing chromedriver ..."
     brew cask install chromedriver
@@ -14,10 +17,12 @@ if [[ "$(java --version)" != "openjdk"* ]]; then
     echo "Installing java ..."
     brew cask install java
 fi
+# TODO: Ensure exiting version is recent
 if ! BO_has selenium-server; then
     echo "Installing selenium-server-standalone ..."
     brew install selenium-server-standalone
 fi
+# TODO: Ensure exiting version is recent
 if ! which nightwatch; then
     npm install -g nightwatch
 fi
@@ -101,6 +106,7 @@ function EXPORTS_run {
                 "desiredCapabilities": {
                     "browserName": "chrome",
                     "chromeOptions" : {
+                        "w3c": false,
                         "prefs" : { 
                             "download": {
                                 "default_directory": "${downloadsPath}",
