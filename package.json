@@ -1,6 +1,6 @@
 {
   "name": "bash.origin.test",
-  "version": "0.2.0-pre.5",
+  "version": "0.2.0-pre.6",
   "pm": {
     "publish": "npm"
   },
@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "cli-table3": "^0.5.0",
-    "bash.origin.lib": "^0.4.0-pre.6"
+    "bash.origin.lib": "^0.4.0-pre.7",
+    "lib.json": "^0.0.6-pre.0"
   },
   "scripts": {
     "install": "lib.json from node_modules > .~lib.json",
