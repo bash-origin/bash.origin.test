@@ -136,6 +136,17 @@ function init {
 		[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] init()"
 
 
+		pushd "${__BO_DIR__}/.." > /dev/null
+			if [ ! -e ".~lib.json" ]; then
+				if [ -e "node_modules/.bin/lib.json" ]; then
+					node_modules/.bin/lib.json from node_modules > .~lib.json
+				else
+					lib.json from node_modules > .~lib.json
+				fi
+			fi
+		popd > /dev/null
+
+
 		# TODO: Optionally source profile in runner? Move this to runner.
 		# Source profile to get access to path variables
 		# TODO: Save all ENV variables except for PATH?

@@ -14,7 +14,6 @@
     "lib.json": "^0.0.6-pre.0"
   },
   "scripts": {
-    "install": "lib.json from node_modules > .~lib.json",
     "test": "bash.origin tests/run.sh tests",
     "publish-website": "bash.origin.script ./workspace.sh publish"
   }
