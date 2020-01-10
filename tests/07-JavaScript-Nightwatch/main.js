@@ -1,5 +1,8 @@
 #!/usr/bin/env bash.origin.test via github.com/nightwatchjs/nightwatch
 
+console.log('>>>TEST_IGNORE_LINE:Connected to <<<');
+console.log('>>>TEST_IGNORE_LINE:Using: <<<');
+
 module.exports = {
     'Demo test Google' : function (browser) {
         browser

@@ -5,6 +5,9 @@ environments: default
 >>>TEST_IGNORE_LINE:^127\.<<<
 
 
+- [0;36mConnecting to localhost on port 4444...
+[0m
+
   Hello World
 [bash.origin.express] Adding route: /
 Server: http://localhost:8080/

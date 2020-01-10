@@ -9,6 +9,8 @@ module.config = {
 */
 
 console.log(">>>TEST_IGNORE_LINE:^127\\.<<<");
+console.log('>>>TEST_IGNORE_LINE:Connected to <<<');
+console.log('>>>TEST_IGNORE_LINE:Using: <<<');
 
 describe('Hello World', function() {
 

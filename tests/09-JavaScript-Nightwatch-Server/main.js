@@ -14,6 +14,9 @@ module.config = {
 }
 */
 
+console.log('>>>TEST_IGNORE_LINE:Connected to <<<');
+console.log('>>>TEST_IGNORE_LINE:Using: <<<');
+
 const HTTP = require('http');
 
 describe('Hello World', function() {

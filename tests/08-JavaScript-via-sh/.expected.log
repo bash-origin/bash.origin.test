@@ -12,7 +12,6 @@
     Test code
 
 [jest] RESULT: {
-    "console": null,
     "failureMessage": null,
     "numFailingTests": 0,
     "numPassingTests": 1,
@@ -41,7 +40,6 @@
             "title": "Test"
         }
     ],
-    "sourceMaps": {},
     "skipped": false,
     "leaks": false
 }
@@ -63,6 +61,7 @@
         "failure": false,
         "filesAdded": 0,
         "filesRemoved": 0,
+        "filesRemovedList": [],
         "filesUnmatched": 0,
         "filesUpdated": 0,
         "matched": 0,
@@ -75,7 +74,6 @@
     "success": false,
     "testResults": [
         {
-            "console": null,
             "failureMessage": null,
             "numFailingTests": 0,
             "numPassingTests": 1,
@@ -104,7 +102,6 @@
                     "title": "Test"
                 }
             ],
-            "sourceMaps": {},
             "skipped": false,
             "leaks": false
         }

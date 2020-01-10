@@ -3,6 +3,9 @@
 >>>TEST_IGNORE_LINE:\d+\spassing\s\([^\)]+\)<<<
 environments: default
 
+- [0;36mConnecting to localhost on port 4444...
+[0m
+
 Server running at http://localhost:8080
 
 
