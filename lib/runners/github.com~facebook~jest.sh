@@ -11,7 +11,7 @@ function EXPORTS_run {
 
     echo "TEST_MATCH_IGNORE>>>"
     if ! which jest; then
-        npm install -g jest
+        npm install jest
     fi
     echo "<<<TEST_MATCH_IGNORE"
 

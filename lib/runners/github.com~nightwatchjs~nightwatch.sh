@@ -24,12 +24,14 @@ if ! BO_has selenium-server; then
 fi
 # TODO: Ensure exiting version is recent
 if ! which nightwatch; then
-    npm install -g nightwatch
+    npm install nightwatch
 fi
 echo "<<<TEST_MATCH_IGNORE"
 
 
 echo ">>>TEST_IGNORE_LINE:assertions passed\.<<<"
+echo ">>>TEST_IGNORE_LINE:Connected to <<<"
+echo ">>>TEST_IGNORE_LINE:Using: <<<"
 
 
 function PRIVATE_ensureSeleniumServerRunning {

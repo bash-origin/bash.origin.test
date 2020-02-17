@@ -14,7 +14,7 @@ function EXPORTS_run {
 
     echo "TEST_MATCH_IGNORE>>>"
     if ! which mocha; then
-        npm install -g mocha
+        npm install mocha
     fi
     echo "<<<TEST_MATCH_IGNORE"
 
