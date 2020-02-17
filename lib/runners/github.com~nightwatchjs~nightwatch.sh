@@ -24,7 +24,7 @@ if ! BO_has selenium-server; then
 fi
 # TODO: Ensure exiting version is recent
 if ! which nightwatch; then
-    npm install nightwatch
+    npm install nightwatch@1.3.4
 fi
 echo "<<<TEST_MATCH_IGNORE"
 
