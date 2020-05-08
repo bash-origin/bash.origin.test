@@ -24,8 +24,8 @@ function EXPORTS_run {
 
         echo "Running NodeJS with '--inspect-brk' which launches an interactive debugger ..."
 
-        BO_VERSION_NVM_NODE=7
-        BO_run_node --eval '
+        #BO_VERSION_NVM_NODE=7
+        node --eval '
             const BO_LIB = require("bash.origin.lib").forPackage(__dirname);
             const SPAWN = require("child_process").spawn;
             const EXEC = require("child_process").exec;
@@ -44,7 +44,7 @@ function EXPORTS_run {
                 data = data.toString();
                 if (launch && /Debugger listening on ws:\/\//.test(data)) {
 
-                    const wsUrl = data.match(/Debugger listening on (ws:\/\/.+)/m)[1]
+                    const wsUrl = data.match(/Debugger listening on (ws:\/\/.+)/m)[1];
                     const wsUrl_parsed = URL.parse(wsUrl);
 
                     BO_LIB.REQUEST("http://" + wsUrl_parsed.host + "/json/list", function (err, response, body) {

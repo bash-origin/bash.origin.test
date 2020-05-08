@@ -34,7 +34,7 @@ function EXPORTS_run {
 
         # TODO: Inspect the process that actually runs the test!
         #BO_VERSION_NVM_NODE=7
-        BO_run_node --eval '
+        node --eval '
             const BO_LIB = require("bash.origin.lib").forPackage(__dirname);
             const SPAWN = require("child_process").spawn;
             const EXEC = require("child_process").exec;

@@ -193,9 +193,9 @@ function EXPORTS_run {
 
                 echo "Running NodeJS with '--inspect-brk' which launches an interactive debugger ..."
 
-                BO_VERSION_NVM_NODE=7
+                #BO_VERSION_NVM_NODE=7
                 # TODO: Relocate this into a helper.
-                BO_run_node --eval '
+                node --eval '
                     const BO_LIB = require("bash.origin.lib").forPackage(__dirname);
                     const SPAWN = require("child_process").spawn;
                     const EXEC = require("child_process").exec;

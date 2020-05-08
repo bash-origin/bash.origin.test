@@ -330,6 +330,12 @@ function init {
 							[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $pkgPath"
 							sed -i -e "s/$pkgPath/TeStLoCaLiZeD/g" "$actualResultPath"
 
+							if [ ! -z "${BO_TEST_LOCALIZE_PARENT_PATH}" ]; then
+								customBasePath=`echo "$BO_TEST_LOCALIZE_PARENT_PATH" | sed 's/\\//\\\\\\//g'`
+								[ -z "$BO_VERBOSE" ] || echo "[bash.origin.test][run.sh] Replacing in result: $customBasePath"
+								sed -i -e "s/$customBasePath/TeStLoCaLiZeD/g" "$actualResultPath"
+							fi
+
 							if [ -e "$actualResultPath-e" ]; then
 								rm "$actualResultPath-e"
 							fi
@@ -354,27 +360,27 @@ function init {
 								echo >&2 "$(BO_cecho "[bash.origin.test][run.sh] ERROR: Test result was empty!" RED BOLD)"
 
 								# TODO: If no terminal attached we should exit
-								read -p "$(BO_cecho "[bash.origin.test][run.sh] Press any key to re-run in verbose mode?" RED BOLD)" -n 1 -r
-								echo
+								# read -p "$(BO_cecho "[bash.origin.test][run.sh] Press any key to re-run in verbose mode?" RED BOLD)" -n 1 -r
+								# echo
 
-								echo "'which env': $(which env)"
-								echo "'which bash.origin': $(which bash.origin)"
-								echo "'which bash': $(which bash)"
-								echo "'bash --version': $(bash --version)"
-								echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
-								echo "PWD: $(pwd)"
-								ls -al
-								echo "########## Test File : $testRootFile >>>"
-								cat "$testRootFile"
-								echo "##########"
+								# echo "'which env': $(which env)"
+								# echo "'which bash.origin': $(which bash.origin)"
+								# echo "'which bash': $(which bash)"
+								# echo "'bash --version': $(bash --version)"
+								# echo "'ls -al (which bash.origin)': $(ls -al $(which bash.origin))"
+								# echo "PWD: $(pwd)"
+								# ls -al
+								# echo "########## Test File : $testRootFile >>>"
+								# cat "$testRootFile"
+								# echo "##########"
 
-								echo "| ########## EXECUTING >>>"
-								set -x
-								BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
-								set +x
-								echo "<<< EXECUTING ########## |"
+								# echo "| ########## EXECUTING >>>"
+								# set -x
+								# BO_VERBOSE=1 VERBOSE=1 "$BO_BASH" "$__BO_DIR__/runner.sh" "$testRootFile"
+								# set +x
+								# echo "<<< EXECUTING ########## |"
 
-								echo "[bash.origin.test] Not running more tests so you can fix issue above!"
+								# echo "[bash.origin.test] Not running more tests so you can fix issue above!"
 								exit 1
 							fi
 
